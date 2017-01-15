@@ -15,9 +15,9 @@ SRC_URI="https://github.com/${PN}/${PN}/archive/${PV}.tar.gz -> ${P}.tar.gz"
 KEYWORDS="~amd64 ~arm ~x86"
 LICENSE="BSD-2"
 SLOT="0"
-IUSE="doc test"
+IUSE="doc test +cryptodome"
 
-RDEPEND="dev-python/pycrypto[${PYTHON_USEDEP}]
+RDEPEND="cryptodome? ( dev-python/pycryptodome[${PYTHON_USEDEP},namespaced] ) !cryptodome? ( dev-python/pycryptodome[${PYTHON_USEDEP},-namespaced] )
 	dev-python/requests[${PYTHON_USEDEP}]
 	virtual/python-futures[${PYTHON_USEDEP}]
 	virtual/python-singledispatch[${PYTHON_USEDEP}]
@@ -25,6 +25,16 @@ RDEPEND="dev-python/pycrypto[${PYTHON_USEDEP}]
 DEPEND="dev-python/setuptools[${PYTHON_USEDEP}]
 	doc? ( dev-python/sphinx[${PYTHON_USEDEP}] )
 	test? ( ${RDEPEND} )"
+
+python_prepare_all() {
+	if use cryptodome; then
+		local PATCHES=(
+			${FILESDIR}/${PV}-cryptodomex.patch
+		)
+	fi
+
+	distutils-r1_python_prepare_all
+}
 
 python_compile_all() {
 	use doc && emake -C docs html
