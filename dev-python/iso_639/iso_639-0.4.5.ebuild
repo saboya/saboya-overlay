@@ -15,7 +15,7 @@ DESCRIPTION="Python library for ISO 639 standard"
 HOMEPAGE="https://pypi.python.org/pypi/iso-639 https://github.com/noumar/iso639"
 SRC_URI="mirror://pypi/${PN:0:1}/${MY_PN}/${MY_P}.tar.gz"
 
-LICENSE="MIT"
+LICENSE="AGPL-3"
 SLOT="0"
 KEYWORDS="~amd64 ~x86 ~amd64-linux ~x86-linux"
 IUSE=""
