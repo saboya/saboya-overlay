@@ -22,7 +22,7 @@ RDEPEND="cryptodome? ( dev-python/pycryptodome[${PYTHON_USEDEP},namespaced] ) !c
 	virtual/python-futures[${PYTHON_USEDEP}]
 	virtual/python-singledispatch[${PYTHON_USEDEP}]
 	dev-python/iso3166[${PYTHON_USEDEP}]
-	dev-python/iso639[${PYTHON_USEDEP}]
+	dev-python/iso_639[${PYTHON_USEDEP}]
 	media-video/rtmpdump"
 DEPEND="dev-python/setuptools[${PYTHON_USEDEP}]
 	dev-python/backports-shutil_get_terminal_size[$(python_gen_usedep 'python2*')]
