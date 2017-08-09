@@ -2,11 +2,16 @@
 # Distributed under the terms of the GNU General Public License v2
 # $Header: $
 
-EAPI="2"
+EAPI=6
+
+PYTHON_COMPAT=( python2_7 python3_4 )
+PYTHON_REQ_USE='threads(+)' # required by waf
+
+inherit git-r3 python-any-r1 gnome2-utils waf-utils
 
 DESCRIPTION="Control UPnP of a router"
 HOMEPAGE="https://launchpad.net/upnp-router-control"
-SRC_URI="http://launchpad.net/${PN}/trunk/${PV}/+download/${P}.tar.gz"
+EGIT_REPO_URI="https://git.launchpad.net/upnp-router-control"
 
 LICENSE="|| ( GPL-2 GPL-3 )"
 SLOT="0"
@@ -20,10 +25,24 @@ RDEPEND=">=net-libs/gupnp-0.14.1
 DEPEND="${RDEPEND}
 	dev-util/intltool"
 
+NO_WAF_LIBDIR="true"
+
 src_configure() {
-	econf $(use_enable curl libcurl)
+	libdir='' waf-utils_src_configure
+}
+
+src_compile() {
+	waf-utils_src_compile
 }
 
 src_install() {
-	emake DESTDIR="${D}" install || die
+	waf-utils_src_install
+}
+
+pkg_postinst() {
+	gnome2_icon_cache_update
+}
+
+pkg_postrm() {
+	gnome2_icon_cache_update
 }
