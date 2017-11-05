@@ -19,6 +19,7 @@ LICENSE="hammer-and-chisel"
 RDEPEND=""
 DEPEND="${RDEPEND}
 	>=net-misc/streamlink-0.2.0
+	<=net-misc/streamlink-0.7.0
 	dev-libs/nss
 	gnome-base/gconf
 	media-libs/alsa-lib
