@@ -13,7 +13,7 @@ KEYWORDS="~amd64 ~x86"
 
 RDEPEND=""
 
-S="${WORKDIR}/dxvk-${PV}"
+S="${WORKDIR}/dxvk-v${PV}"
 
 src_install() {
 	local destdir="/opt/${PN}"
