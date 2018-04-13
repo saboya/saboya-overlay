@@ -25,6 +25,6 @@ RDEPEND="${DEPEND}"
 
 src_install() {
 	insinto /usr/share/icons
-	doins -r Flat\ Remix
+	doins -r Flat-Remix Flat-Remix-Dark Flat-Remix-Light
 	dodoc README.md
 }
