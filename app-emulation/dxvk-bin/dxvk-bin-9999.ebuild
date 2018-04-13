@@ -2,6 +2,8 @@
 
 EAPI="6"
 
+inherit git-r3
+
 DESCRIPTION="Vulkan-based D3D11 implementation for Linux / Wine"
 HOMEPAGE="https://github.com/doitsujin/dxvk"
 RESTRICT="mirror"
