@@ -23,7 +23,7 @@ else
 fi
 
 
-IUSE="+abi_x86_32 +abi_x86_64"
+IUSE="+abi_x86_32 +abi_x86_64 +buildinfo"
 
 REQUIRED_USE="
 	|| ( abi_x86_32 abi_x86_64 )
@@ -43,6 +43,28 @@ DEPEND="
 	>=dev-util/meson-0.43
 "
 
+PATCHES=( )
+
+src_prepare() {
+	if [ ${PV} == "9999" ] && use buildinfo; then
+		local hudpatch="${T}/buildinfo.patch"
+
+		cp "${FILESDIR}/hud-Add-new-option-buildinfo.patch" $hudpatch
+
+		local buildinfo=${PV}
+
+		if [[ ${PV} == "9999" ]]; then
+			buildinfo=$(git-r3_peek_remote_ref | cut -c1-7)
+		fi
+
+		sed -i "s/__BUILDINFO__/${buildinfo}/" $hudpatch || die
+
+		PATCHES+=($hudpatch)
+	fi
+
+	default
+}
+
 multilib_src_configure() {
 	local arch=${MULTILIB_ABI_FLAG##*_}
 	local crossfile="${S}/build-win${arch}.txt"
@@ -60,6 +82,7 @@ multilib_src_configure() {
 
 
 	meson_src_configure
+
 }
 
 

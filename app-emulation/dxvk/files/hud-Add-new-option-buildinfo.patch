@@ -1,0 +1,172 @@
+From e0200577b64146dc4934e6132ab43b74156c2137 Mon Sep 17 00:00:00 2001
+From: Rodrigo Saboya <saboya@users.noreply.github.com>
+Date: Sat, 21 Apr 2018 18:17:04 -0300
+Subject: [PATCH] [hud] Adding new option buildinfo.
+
+---
+ src/dxvk/hud/dxvk_hud.cpp           |  8 +++++++-
+ src/dxvk/hud/dxvk_hud.h             |  2 ++
+ src/dxvk/hud/dxvk_hud_buildinfo.cpp | 26 ++++++++++++++++++++++++++
+ src/dxvk/hud/dxvk_hud_buildinfo.h   | 30 ++++++++++++++++++++++++++++++
+ src/dxvk/hud/dxvk_hud_config.cpp    |  1 +
+ src/dxvk/hud/dxvk_hud_config.h      |  1 +
+ src/dxvk/meson.build                |  1 +
+ 7 files changed, 68 insertions(+), 1 deletion(-)
+ create mode 100644 src/dxvk/hud/dxvk_hud_buildinfo.cpp
+ create mode 100644 src/dxvk/hud/dxvk_hud_buildinfo.h
+
+diff --git a/src/dxvk/hud/dxvk_hud.cpp b/src/dxvk/hud/dxvk_hud.cpp
+index ee24df3..cfddfe2 100644
+--- a/src/dxvk/hud/dxvk_hud.cpp
++++ b/src/dxvk/hud/dxvk_hud.cpp
+@@ -14,7 +14,8 @@ namespace dxvk::hud {
+     m_uniformBuffer (createUniformBuffer()),
+     m_hudDeviceInfo (device),
+     m_hudFramerate  (config.elements),
+-    m_hudStats      (config.elements) {
++    m_hudStats      (config.elements),
++    m_hudBuildInfo  () {
+     this->setupConstantState();
+   }
+   
+@@ -75,6 +76,11 @@ namespace dxvk::hud {
+         m_context, m_renderer, position);
+     }
+     
++    if (m_config.elements.test(HudElement::BuildInfo)) {
++      position = m_hudBuildInfo.render(
++        m_context, m_renderer, position);
++    }
++    
+     position = m_hudFramerate.render(m_context, m_renderer, position);
+     position = m_hudStats    .render(m_context, m_renderer, position);
+   }
+diff --git a/src/dxvk/hud/dxvk_hud.h b/src/dxvk/hud/dxvk_hud.h
+index c3887f4..eb9fb9b 100644
+--- a/src/dxvk/hud/dxvk_hud.h
++++ b/src/dxvk/hud/dxvk_hud.h
+@@ -4,6 +4,7 @@
+ 
+ #include "../util/util_env.h"
+ 
++#include "dxvk_hud_buildinfo.h"
+ #include "dxvk_hud_config.h"
+ #include "dxvk_hud_devinfo.h"
+ #include "dxvk_hud_fps.h"
+@@ -85,6 +86,7 @@ namespace dxvk::hud {
+     HudDeviceInfo         m_hudDeviceInfo;
+     HudFps                m_hudFramerate;
+     HudStats              m_hudStats;
++    HudBuildInfo          m_hudBuildInfo;
+     
+     void render();
+     
+diff --git a/src/dxvk/hud/dxvk_hud_buildinfo.cpp b/src/dxvk/hud/dxvk_hud_buildinfo.cpp
+new file mode 100644
+index 0000000..45f3596
+--- /dev/null
++++ b/src/dxvk/hud/dxvk_hud_buildinfo.cpp
+@@ -0,0 +1,26 @@
++#include "dxvk_hud_buildinfo.h"
++
++namespace dxvk::hud {
++  
++  HudBuildInfo::HudBuildInfo() {
++    m_buildString = "Build __BUILDINFO__";
++  }
++  
++  
++  HudBuildInfo::~HudBuildInfo() {
++  }
++  
++  
++  HudPos HudBuildInfo::render(
++    const Rc<DxvkContext>&  context,
++          HudRenderer&      renderer,
++          HudPos            position) {
++    renderer.drawText(context, 16.0f,
++      { position.x, position.y },
++      { 1.0f, 1.0f, 1.0f, 1.0f },
++      m_buildString);
++    
++    return HudPos { position.x, position.y + 24 };
++  }
++  
++}
+\ No newline at end of file
+diff --git a/src/dxvk/hud/dxvk_hud_buildinfo.h b/src/dxvk/hud/dxvk_hud_buildinfo.h
+new file mode 100644
+index 0000000..9504bea
+--- /dev/null
++++ b/src/dxvk/hud/dxvk_hud_buildinfo.h
+@@ -0,0 +1,30 @@
++#pragma once
++
++#include "dxvk_hud_renderer.h"
++
++namespace dxvk::hud {
++  
++  /**
++   * \brief Build info display for the HUD
++   * 
++   * Displays the tag / hash of the build.
++   */
++  class HudBuildInfo {
++    
++  public:
++    
++    HudBuildInfo();
++    ~HudBuildInfo();
++    
++    HudPos render(
++      const Rc<DxvkContext>&  context,
++            HudRenderer&      renderer,
++            HudPos            position);
++    
++  private:
++    
++    std::string m_buildString;
++    
++  };
++  
++}
+\ No newline at end of file
+diff --git a/src/dxvk/hud/dxvk_hud_config.cpp b/src/dxvk/hud/dxvk_hud_config.cpp
+index 1c0108d..aa62fc6 100644
+--- a/src/dxvk/hud/dxvk_hud_config.cpp
++++ b/src/dxvk/hud/dxvk_hud_config.cpp
+@@ -12,6 +12,7 @@ namespace dxvk::hud {
+     { "submissions",  HudElement::StatSubmissions   },
+     { "pipelines",    HudElement::StatPipelines     },
+     { "memory",       HudElement::StatMemory        },
++    { "buildinfo",    HudElement::BuildInfo         },
+   }};
+   
+   
+diff --git a/src/dxvk/hud/dxvk_hud_config.h b/src/dxvk/hud/dxvk_hud_config.h
+index 77516dc..bd9d080 100644
+--- a/src/dxvk/hud/dxvk_hud_config.h
++++ b/src/dxvk/hud/dxvk_hud_config.h
+@@ -18,6 +18,7 @@ namespace dxvk::hud {
+     StatSubmissions   = 4,
+     StatPipelines     = 5,
+     StatMemory        = 6,
++    BuildInfo         = 7,
+   };
+   
+   using HudElements = Flags<HudElement>;
+diff --git a/src/dxvk/meson.build b/src/dxvk/meson.build
+index 234d1f6..61cabf0 100644
+--- a/src/dxvk/meson.build
++++ b/src/dxvk/meson.build
+@@ -62,6 +62,7 @@ dxvk_src = files([
+   'dxvk_util.cpp',
+   
+   'hud/dxvk_hud.cpp',
++  'hud/dxvk_hud_buildinfo.cpp',
+   'hud/dxvk_hud_config.cpp',
+   'hud/dxvk_hud_devinfo.cpp',
+   'hud/dxvk_hud_font.cpp',
+-- 
+2.16.1
+
