@@ -53,7 +53,7 @@ DEPEND="
 # engine. This engine is built into GTK+3.
 RDEPEND="
 	gtk2? (
-		x11-themes/gnome-themes-standard
+		x11-themes/gnome-themes-extra
 	)
 	x11-themes/gtk-engines-murrine
 "
