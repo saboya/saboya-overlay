@@ -43,7 +43,7 @@ DEPEND="
 	>=dev-util/meson-0.43
 "
 
-PATCHES=( )
+PATCHES=( "${FILESDIR}/Adding-env-var-for-opting-into-24-bit-Vulkan-formats.patch" )
 
 src_prepare() {
 	if [ ${PV} == "9999" ] && use buildinfo; then
@@ -61,7 +61,6 @@ src_prepare() {
 
 		PATCHES+=($hudpatch)
 	fi
-
 	default
 }
 
