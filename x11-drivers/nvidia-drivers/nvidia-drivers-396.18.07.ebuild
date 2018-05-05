@@ -3,31 +3,24 @@
 
 EAPI=6
 inherit eutils flag-o-matic linux-info linux-mod multilib-minimal nvidia-driver \
-	portability toolchain-funcs unpacker user udev
+	portability toolchain-funcs unpacker user udev versionator
 
 DESCRIPTION="NVIDIA Accelerated Graphics Driver"
 HOMEPAGE="http://www.nvidia.com/ http://www.nvidia.com/Download/Find.aspx"
 
-BETA_PV="${PV}.05"
-
-AMD64_FBSD_NV_PACKAGE="NVIDIA-FreeBSD-x86_64-${BETA_PV}"
-AMD64_NV_PACKAGE="NVIDIA-Linux-x86_64-${BETA_PV}"
-ARM_NV_PACKAGE="NVIDIA-Linux-armv7l-gnueabihf-${BETA_PV}"
-X86_FBSD_NV_PACKAGE="NVIDIA-FreeBSD-x86-${BETA_PV}"
-X86_NV_PACKAGE="NVIDIA-Linux-x86-${BETA_PV}"
-
-NV_URI="http://developer.download.nvidia.com/assets/gameworks/downloads/secure/Vulkan_Beta_Drivers/"
+NV_URI="http://us.download.nvidia.com/XFree86/"
+NV_TOOLS_PV=$(get_version_component_range 1-2 ${PV})
 SRC_URI="
-	amd64? ( ${NV_URI}Linux-x86_64/${BETA_PV}/${AMD64_NV_PACKAGE}.run )
+	amd64? ( https://developer.nvidia.com/$(delete_all_version_separators ${PV})-linux -> NVIDIA-Linux-x86_64-396.18.07.run )
 	tools? (
-		https://download.nvidia.com/XFree86/nvidia-settings/nvidia-settings-${PV}.tar.bz2
+		https://download.nvidia.com/XFree86/nvidia-settings/nvidia-settings-${NV_TOOLS_PV}.tar.bz2
 	)
 "
 
 LICENSE="GPL-2 NVIDIA-r2"
-SLOT="0/${PV}"
+SLOT="0/${PV%.*}"
 KEYWORDS="-* ~amd64"
-RESTRICT="bindist mirror fetch"
+RESTRICT="bindist mirror"
 EMULTILIB_PKG="true"
 
 IUSE="acpi compat +driver gtk3 kernel_FreeBSD kernel_linux +kms multilib pax_kernel static-libs +tools uvm wayland +X"
@@ -89,11 +82,11 @@ nvidia_drivers_versions_check() {
 		die "Unexpected \${DEFAULT_ABI} = ${DEFAULT_ABI}"
 	fi
 
-	if use kernel_linux && kernel_is ge 4 16; then
+	if use kernel_linux && kernel_is ge 4 17; then
 		ewarn "Gentoo supports kernels which are supported by NVIDIA"
 		ewarn "which are limited to the following kernels:"
-		ewarn "<sys-kernel/gentoo-sources-4.16"
-		ewarn "<sys-kernel/vanilla-sources-4.16"
+		ewarn "<sys-kernel/gentoo-sources-4.17"
+		ewarn "<sys-kernel/vanilla-sources-4.17"
 		ewarn ""
 		ewarn "You are free to utilize epatch_user to provide whatever"
 		ewarn "support you feel is appropriate, but will not receive"
@@ -168,7 +161,7 @@ pkg_setup() {
 		NV_SRC="${S}/kernel"
 		NV_MAN="${S}"
 		NV_X11="${S}"
-		NV_SOVER=${BETA_PV}
+		NV_SOVER=${PV}
 	else
 		die "Could not determine proper NVIDIA package"
 	fi
@@ -190,7 +183,7 @@ src_prepare() {
 	if use tools; then
 		cp "${FILESDIR}"/nvidia-settings-linker.patch "${WORKDIR}" || die
 		sed -i \
-			-e "s:@PV@:${PV}:g" \
+			-e "s:@PV@:${NV_TOOLS_PV}:g" \
 			"${WORKDIR}"/nvidia-settings-linker.patch || die
 		eapply "${WORKDIR}"/nvidia-settings-linker.patch
 	fi
@@ -217,7 +210,7 @@ src_compile() {
 	fi
 
 	if use tools; then
-		emake -C "${S}"/nvidia-settings-${PV}/src \
+		emake -C "${S}"/nvidia-settings-${NV_TOOLS_PV}/src \
 			AR="$(tc-getAR)" \
 			CC="$(tc-getCC)" \
 			DO_STRIP= \
@@ -228,7 +221,7 @@ src_compile() {
 			RANLIB="$(tc-getRANLIB)" \
 			build-xnvctrl
 
-		emake -C "${S}"/nvidia-settings-${PV}/src \
+		emake -C "${S}"/nvidia-settings-${NV_TOOLS_PV}/src \
 			CC="$(tc-getCC)" \
 			DO_STRIP= \
 			GTK3_AVAILABLE=$(usex gtk3 1 0) \
@@ -397,7 +390,7 @@ src_install() {
 	fi
 
 	if use tools; then
-		emake -C "${S}"/nvidia-settings-${PV}/src/ \
+		emake -C "${S}"/nvidia-settings-${NV_TOOLS_PV}/src/ \
 			DESTDIR="${D}" \
 			GTK3_AVAILABLE=$(usex gtk3 1 0) \
 			LIBDIR="${D}/usr/$(get_libdir)" \
@@ -408,18 +401,18 @@ src_install() {
 			install
 
 		if use static-libs; then
-			dolib.a "${S}"/nvidia-settings-${PV}/src/libXNVCtrl/libXNVCtrl.a
+			dolib.a "${S}"/nvidia-settings-${NV_TOOLS_PV}/src/libXNVCtrl/libXNVCtrl.a
 
 			insinto /usr/include/NVCtrl
-			doins "${S}"/nvidia-settings-${PV}/src/libXNVCtrl/*.h
+			doins "${S}"/nvidia-settings-${NV_TOOLS_PV}/src/libXNVCtrl/*.h
 		fi
 
 		insinto /usr/share/nvidia/
-		doins nvidia-application-profiles-${BETA_PV}-key-documentation
+		doins nvidia-application-profiles-${PV}-key-documentation
 
 		insinto /etc/nvidia
 		newins \
-			nvidia-application-profiles-${BETA_PV}-rc nvidia-application-profiles-rc
+			nvidia-application-profiles-${PV}-rc nvidia-application-profiles-rc
 
 		# There is no icon in the FreeBSD tarball.
 		use kernel_FreeBSD || \
