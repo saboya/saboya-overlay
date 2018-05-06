@@ -72,7 +72,7 @@ index 0000000..45f3596
 +namespace dxvk::hud {
 +  
 +  HudBuildInfo::HudBuildInfo() {
-+    m_buildString = "Build __BUILDINFO__";
++    m_buildString = "Build: __BUILDINFO__";
 +  }
 +  
 +  
