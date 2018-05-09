@@ -71,7 +71,6 @@ multilib_src_configure() {
 	local crossfile="${S}/build-win${arch}.txt"
 
 	local cpu=${CHOST%%-*}
-	echo ${cpu}
 
 	cat > "${T}/meson.${CHOST}" <<-EOF
 	[binaries]
@@ -81,11 +80,11 @@ multilib_src_configure() {
 	strip = '/usr/bin/${cpu}-w64-mingw32-strip'
 
 	[properties]
-	c_args = $(_meson_env_array "${CFLAGS}")
-	c_link_args = $(_meson_env_array "${LDFLAGS} -static")
+	c_args = $(_meson_env_array "${CFLAGS} -falign-functions")
+	c_link_args = $(_meson_env_array "${LDFLAGS} -static -static-libgcc")
 
-	cpp_args = $(_meson_env_array "${CXXFLAGS}")
-	cpp_link_args = $(_meson_env_array "${LDFLAGS} -static -Wl,--add-stdcall-alias,--enable-stdcall-fixup")
+	cpp_args = $(_meson_env_array "${CXXFLAGS} -falign-functions")
+	cpp_link_args = $(_meson_env_array "${LDFLAGS} -static -static-libgcc -static-libstdc++ -Wl,--add-stdcall-alias,--enable-stdcall-fixup")
 
 	[host_machine]
 	system = 'windows'
