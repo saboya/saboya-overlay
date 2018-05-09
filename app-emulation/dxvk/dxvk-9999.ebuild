@@ -66,14 +66,36 @@ src_prepare() {
 
 multilib_src_configure() {
 	local arch=${MULTILIB_ABI_FLAG##*_}
+	local meson_cpu
+	[[ $arch = '64' ]] && meson_cpu="x86_64" || meson_cpu="x86"
 	local crossfile="${S}/build-win${arch}.txt"
 
-	# Skips executable sanity check, errors out on 64-bit build.
-	# Let's hope our compilers are not broken.
-	sed -i '/^exe_wrapper/d' "${crossfile}"
+	local cpu=${CHOST%%-*}
+	echo ${cpu}
+
+	cat > "${T}/meson.${CHOST}" <<-EOF
+	[binaries]
+	ar = "/usr/bin/${cpu}-w64-mingw32-ar"
+	c = '/usr/bin/${cpu}-w64-mingw32-gcc'
+	cpp = '/usr/bin/${cpu}-w64-mingw32-g++'
+	strip = '/usr/bin/${cpu}-w64-mingw32-strip'
+
+	[properties]
+	c_args = $(_meson_env_array "${CFLAGS}")
+	c_link_args = $(_meson_env_array "${LDFLAGS} -static")
+
+	cpp_args = $(_meson_env_array "${CXXFLAGS}")
+	cpp_link_args = $(_meson_env_array "${LDFLAGS} -static -Wl,--add-stdcall-alias,--enable-stdcall-fixup")
+
+	[host_machine]
+	system = 'windows'
+	cpu_family = '${meson_cpu}'
+	cpu = '${meson_cpu}'
+	endian = 'little'
+	EOF
 
 	local emesonargs=(
-		--cross-file "${S}/build-win${arch}.txt"
+		--cross-file "${T}/meson.${CHOST}"
 		--prefix "${BUILD_DIR}/install"
 		--unity on
 		-Denable-tests=false
