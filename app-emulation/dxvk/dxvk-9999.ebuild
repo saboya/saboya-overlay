@@ -23,7 +23,7 @@ else
 fi
 
 
-IUSE="+abi_x86_32 +abi_x86_64 +buildinfo"
+IUSE="+abi_x86_32 +abi_x86_64 +buildinfo +env-map-nowait"
 
 REQUIRED_USE="
 	|| ( abi_x86_32 abi_x86_64 )
@@ -46,6 +46,9 @@ DEPEND="
 PATCHES=( )
 
 src_prepare() {
+	if use env-map-nowait; then
+		PATCHES+=( "${FILESDIR}/env-map-nowait.patch" )
+	fi
 	if use buildinfo; then
 		local hudpatch="${T}/buildinfo.patch"
 
