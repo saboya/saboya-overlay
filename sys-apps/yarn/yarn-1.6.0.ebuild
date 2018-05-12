@@ -25,10 +25,9 @@ src_install() {
 	insinto "${install_dir}"
 	doins -r .
 	dosym "../$(get_libdir)/node_modules/yarn/bin/yarn.js" "/usr/bin/yarn"
-	fperms a+x "${install_dir}/bin/yarn.js"
 
 	while read -r -d '' path; do
-		read -r shebang < ${path}
+		read -r shebang < ${path} || die
 		[[ "${shebang}" == \#\!* ]] || continue
 		chmod +x "${path}" || die #614094
 	done < <(find "${ED}" -type f -print0 || die)
