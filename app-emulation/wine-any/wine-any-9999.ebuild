@@ -15,7 +15,7 @@ if [[ ${PV} == "9999" ]] ; then
 	EGIT_REPO_URI="https://source.winehq.org/git/wine.git"
 	EGIT_BRANCH="master"
 	SRC_URI=""
-	KEYWORDS=""
+	#KEYWORDS=""
 else
 	MAJOR_V=$(get_version_component_range 1)
 	SRC_URI="https://dl.winehq.org/wine/source/${MAJOR_V}.x/${MY_P}.tar.xz"
@@ -28,7 +28,6 @@ STAGING_DIR="${WORKDIR}/${STAGING_P}"
 D3D9_P="wine-d3d9-${PV}"
 D3D9_DIR="${WORKDIR}/wine-d3d9-patches-${D3D9_P}"
 PBA_DIR="${WORKDIR}/wine-pba-${PV}"
-DOITSUJIN_DIR="${WORKDIR}/wine-doitsujin-${PV}"
 GWP_V="20180120"
 PATCHDIR="${WORKDIR}/gentoo-wine-patches"
 
@@ -37,6 +36,7 @@ HOMEPAGE="https://www.winehq.org/"
 SRC_URI="${SRC_URI}
 	https://dev.gentoo.org/~np-hardass/distfiles/wine/gentoo-wine-patches-${GWP_V}.tar.xz
 "
+PBA_EGIT_REPO_URI="https://github.com/Firerat/wine-pba.git"
 
 if [[ ${PV} == "9999" ]] ; then
 	STAGING_EGIT_REPO_URI="https://github.com/wine-staging/wine-staging.git"
@@ -49,12 +49,11 @@ fi
 
 LICENSE="LGPL-2.1"
 SLOT="${PV}"
-IUSE="+abi_x86_32 +abi_x86_64 +alsa capi cups custom-cflags d3d9 doitsujin dos elibc_glibc +fontconfig +gecko gphoto2 gsm gssapi gstreamer +jpeg kerberos kernel_FreeBSD +lcms ldap +mono mp3 native-xaudio2 ncurses netapi nls odbc openal opencl +opengl osmesa oss pba +perl pcap pipelight +png prelink pulseaudio +realtime +run-exes s3tc samba scanner selinux +ssl staging test themes +threads +truetype udev +udisks v4l vaapi vulkan +X +xcomposite xinerama +xml"
+IUSE="+abi_x86_32 +abi_x86_64 +alsa capi cups custom-cflags d3d9 dos elibc_glibc +fontconfig +gecko gphoto2 gsm gssapi gstreamer +jpeg kerberos kernel_FreeBSD +lcms ldap +mono mp3 native-xaudio2 ncurses netapi nls odbc openal opencl +opengl osmesa oss pba +perl pcap pipelight +png prelink pulseaudio +realtime +run-exes s3tc samba scanner sdl selinux +ssl staging test themes +threads +truetype udev +udisks v4l vaapi vkd3d vulkan +X +xcomposite xinerama +xml"
 REQUIRED_USE="|| ( abi_x86_32 abi_x86_64 )
 	X? ( truetype )
 	elibc_glibc? ( threads )
 	osmesa? ( opengl )
-	pba ( staging )
 	pipelight? ( staging )
 	s3tc? ( staging )
 	test? ( abi_x86_32 )
@@ -111,6 +110,7 @@ COMMON_DEPEND="
 	png? ( media-libs/libpng:0=[${MULTILIB_USEDEP}] )
 	pulseaudio? ( media-sound/pulseaudio[${MULTILIB_USEDEP}] )
 	scanner? ( media-gfx/sane-backends:=[${MULTILIB_USEDEP}] )
+	sdl? ( media-libs/libsdl2:=[haptic,joystick,${MULTILIB_USEDEP}] )
 	ssl? ( net-libs/gnutls:=[${MULTILIB_USEDEP}] )
 	staging? ( sys-apps/attr[${MULTILIB_USEDEP}] )
 	themes? (
@@ -123,28 +123,13 @@ COMMON_DEPEND="
 	udisks? ( sys-apps/dbus[${MULTILIB_USEDEP}] )
 	v4l? ( media-libs/libv4l[${MULTILIB_USEDEP}] )
 	vaapi? ( x11-libs/libva[X,${MULTILIB_USEDEP}] )
+	vkd3d? ( app-emulation/vkd3d[${MULTILIB_USEDEP}] )
 	vulkan? ( media-libs/vulkan-loader[${MULTILIB_USEDEP}] )
 	xcomposite? ( x11-libs/libXcomposite[${MULTILIB_USEDEP}] )
 	xinerama? ( x11-libs/libXinerama[${MULTILIB_USEDEP}] )
 	xml? (
 		dev-libs/libxml2[${MULTILIB_USEDEP}]
 		dev-libs/libxslt[${MULTILIB_USEDEP}]
-	)
-	abi_x86_32? (
-		!app-emulation/emul-linux-x86-baselibs[-abi_x86_32(-)]
-		!<app-emulation/emul-linux-x86-baselibs-20140508-r14
-		!app-emulation/emul-linux-x86-db[-abi_x86_32(-)]
-		!<app-emulation/emul-linux-x86-db-20140508-r3
-		!app-emulation/emul-linux-x86-medialibs[-abi_x86_32(-)]
-		!<app-emulation/emul-linux-x86-medialibs-20140508-r6
-		!app-emulation/emul-linux-x86-opengl[-abi_x86_32(-)]
-		!<app-emulation/emul-linux-x86-opengl-20140508-r1
-		!app-emulation/emul-linux-x86-sdl[-abi_x86_32(-)]
-		!<app-emulation/emul-linux-x86-sdl-20140508-r1
-		!app-emulation/emul-linux-x86-soundlibs[-abi_x86_32(-)]
-		!<app-emulation/emul-linux-x86-soundlibs-20140508
-		!app-emulation/emul-linux-x86-xlibs[-abi_x86_32(-)]
-		!<app-emulation/emul-linux-x86-xlibs-20140508
 	)"
 
 RDEPEND="${COMMON_DEPEND}
@@ -172,17 +157,13 @@ DEPEND="${COMMON_DEPEND}
 	>=sys-kernel/linux-headers-2.6
 	virtual/pkgconfig
 	virtual/yacc
-	X? (
-		x11-proto/inputproto
-		x11-proto/xextproto
-		x11-proto/xf86vidmodeproto
-	)
+	X? ( x11-base/xorg-proto )
 	prelink? ( sys-devel/prelink )
 	staging? (
 		dev-lang/perl
 		dev-perl/XML-Simple
 	)
-	xinerama? ( x11-proto/xineramaproto )"
+	xinerama? ( x11-base/xorg-proto )"
 
 # These use a non-standard "Wine" category, which is provided by
 # /etc/xdg/applications-merged/wine.menu
@@ -363,18 +344,11 @@ src_unpack() {
 			git-r3_checkout "${D3D9_EGIT_REPO_URI}" "${D3D9_DIR}"
 		fi
 	fi
+
 	if use pba; then
-		PBA_EGIT_REPO_URI="https://github.com/acomminos/wine-pba"
 		git-r3_fetch "${PBA_EGIT_REPO_URI}" "${PBA_COMMIT}"
 		git-r3_checkout "${PBA_EGIT_REPO_URI}" "${PBA_DIR}"
 	fi
-
-	if use doitsujin; then
-		DOITSUJIN_EGIT_REPO_URI="https://github.com/doitsujin/wine-hacks"
-		git-r3_fetch "${DOITSUJIN_EGIT_REPO_URI}" "${DOITSUJIN_COMMIT}"
-		git-r3_checkout "${DOITSUJIN_EGIT_REPO_URI}" "${DOITSUJIN_DIR}"
-	fi
-
 
 	default
 
@@ -419,12 +393,6 @@ src_prepare() {
 	if use pba; then
 		for PATCH in ${PBA_DIR}/patches/*.patch; do
 			einfo "Applying PBA patch ${PATCH}"
-			PATCHES+=( "${PATCH}" )
-		done
-	fi
-	if use doitsujin; then
-		for PATCH in ${DOITSUJIN_DIR}/*.patch; do
-			einfo "Applying DOITSUJIN patch ${PATCH}"
 			PATCHES+=( "${PATCH}" )
 		done
 	fi
@@ -532,10 +500,12 @@ multilib_src_configure() {
 		$(use_with pulseaudio pulse)
 		$(use_with threads pthread)
 		$(use_with scanner sane)
+		$(use_with sdl)
 		$(use_enable test tests)
 		$(use_with truetype freetype)
 		$(use_with udev)
 		$(use_with v4l)
+		$(use_with vkd3d)
 		$(use_with vulkan)
 		$(use_with X x)
 		$(use_with X xfixes)
