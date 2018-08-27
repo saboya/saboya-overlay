@@ -1,4 +1,4 @@
-# Copyright 1999-2017 Gentoo Foundation
+# Copyright 1999-2018 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=6
@@ -17,7 +17,7 @@ RESTRICT="mirror strip bindist"
 LICENSE="MIT"
 SLOT="0"
 KEYWORDS="~x86 ~amd64"
-IUSE=""
+IUSE="libsecret"
 
 DEPEND="
 	>=media-libs/libpng-1.2.46
@@ -29,10 +29,10 @@ DEPEND="
 
 RDEPEND="
 	${DEPEND}
-	>=net-print/cups-2.0.0
 	x11-libs/libnotify
 	x11-libs/libXScrnSaver
-	app-crypt/libsecret[crypt]
+	dev-libs/nss
+	libsecret? ( app-crypt/libsecret[crypt] )
 "
 
 QA_PRESTRIPPED="opt/${PN}/code"
@@ -53,6 +53,7 @@ src_install(){
 	fperms +x "/opt/${PN}/bin/code"
 	fperms +x "/opt/${PN}/libnode.so"
 	fperms +x "/opt/${PN}/resources/app/node_modules.asar.unpacked/vscode-ripgrep/bin/rg"
+	fperms +x "/opt/${PN}/resources/app/extensions/git/out/askpass.sh"
 	insinto "/usr/share/licenses/${PN}"
 	newins "resources/app/LICENSE.txt" "LICENSE"
 }
@@ -61,4 +62,3 @@ pkg_postinst(){
 	elog "You may install some additional utils, so check them in:"
 	elog "https://code.visualstudio.com/Docs/setup#_additional-tools"
 }
-
