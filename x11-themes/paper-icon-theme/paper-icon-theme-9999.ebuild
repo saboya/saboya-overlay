@@ -3,42 +3,35 @@
 
 EAPI=6
 
-inherit autotools gnome2-utils
-
-DESCRIPTION="Paper is an icon theme for GTK-based desktops and fits perfectly the paper-gtk-theme"
-HOMEPAGE="https://snwh.org/paper"
-
-if [[ ${PV} == *9999 ]];then
-	inherit git-r3
+inherit gnome2 meson
+if [[ -z ${PV%%*9999} ]]; then
 	SRC_URI=""
-	KEYWORDS=""
 	EGIT_REPO_URI="https://github.com/snwh/${PN}.git"
+	inherit git-r3
 else
-	SRC_URI="https://github.com/snwh/${PN}/archive/v${PV}.tar.gz -> ${P}.tar.gz"
-	KEYWORDS="~x86 ~amd64 ~arm"
+	inherit vcs-snapshot
+	MY_PV="b5ab102"
+	[[ -n ${PV%%*_p*} ]] && MY_PV="v.${PV}"
+	SRC_URI="
+		mirror://githubcl/snwh/${PN}/tar.gz/${MY_PV} -> ${P}.tar.gz
+	"
+	RESTRICT="primaryuri"
+	KEYWORDS="~amd64 ~x86"
 fi
+
+DESCRIPTION="A simple and modern icon theme with material design influences"
+HOMEPAGE="https://snwh.org/paper"
 
 LICENSE="CC-BY-SA-4.0"
 SLOT="0"
 IUSE=""
 
 DEPEND=""
-RDEPEND="${DEPEND}"
+RDEPEND="
+	${DEPEND}
+"
 
-src_prepare(){
-	PATCHES=( "${FILESDIR}/configure.ac.patch" )
-	default
-	eautoreconf
-}
-
-pkg_preinst(){
-	gnome2_icon_savelist
-}
-
-pkg_postinst(){
-	gnome2_icon_cache_update
-}
-
-pkg_postrm(){
-	gnome2_icon_cache_update
+src_prepare() {
+	gnome2_src_prepare
+	find Paper* -type f -perm /111 -execdir fperms 0644 {} +
 }
