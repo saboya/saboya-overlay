@@ -11,13 +11,13 @@ EAPI=7
 inherit autotools
 
 DESCRIPTION="A flat theme with transparent elements for GTK+3, GTK+2 and GNOME Shell"
-HOMEPAGE="https://github.com/NicoHood/arc-theme"
-SRC_URI="https://github.com/NicoHood/${PN}/releases/download/${PV}/${P}.tar.xz
-	pre-rendered? ( https://dev.gentoo.org/~chewi/distfiles/${P}-pngs.tar.xz )"
+HOMEPAGE="https://github.com/arc-design/arc-theme.git"
+SRC_URI="https://github.com/NicoHood/${PN}/releases/download/${PV}/${P}.tar.xz"
+#	pre-rendered? ( https://dev.gentoo.org/~chewi/distfiles/${P}-pngs.tar.xz )"
 LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS="~amd64 ~arm ~x86"
-IUSE="cinnamon gnome-shell +gtk2 +gtk3 mate +pre-rendered xfce"
+IUSE="cinnamon gnome-shell +dark +darker +light +gtk2 +gtk3 mate pre-rendered xfce"
 
 SASSC_DEPEND="
 	dev-lang/sassc
@@ -79,6 +79,9 @@ src_configure() {
 		$(use_enable cinnamon) \
 		$(use_enable gtk2) \
 		$(use_enable gtk3) \
+		$(use_enable dark) \
+		$(use_enable darker) \
+		$(use_enable light) \
 		$(use_enable gnome-shell) \
 		$(use_enable mate metacity) \
 		$(use_enable xfce xfwm)
