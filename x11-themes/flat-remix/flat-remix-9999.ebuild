@@ -10,6 +10,7 @@ HOMEPAGE="https://github.com/daniruiz/Flat-Remix"
 
 if [[ ${PV} == "9999" ]] ; then
 	SRC_URI=""
+	EGIT_SUBMODULES=()
 	EGIT_REPO_URI="https://github.com/daniruiz/${PN}.git"
 	KEYWORDS=""
 else
