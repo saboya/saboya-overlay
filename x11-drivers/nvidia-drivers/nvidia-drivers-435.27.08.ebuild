@@ -14,18 +14,14 @@ ARM_NV_PACKAGE="NVIDIA-Linux-armv7l-gnueabihf-${PV}"
 
 NV_URI="https://us.download.nvidia.com/XFree86/"
 NV_DEV_URI="https://developer.nvidia.com/"
-NV_TOOLS_PV=$(get_version_component_range 1-2 ${PV})
+AMD64_URI="${NV_URI}Linux-x86_64/${PV}/${AMD64_NV_PACKAGE}.run"
+NV_TOOLS_PV=${PV}
 
-# FIX: for 435.19.02, not match 435.19 driver
-if [[ "${PV}" == "435.24.02" ]]; then
+if [[ "${PV}" == "435.27.08" ]]; then
+		AMD64_URI="${NV_DEV_URI}vulkan-beta-4352708-linux -> NVIDIA-Linux-x86_64-${PV}.run"
         NV_TOOLS_PV="435.21"
 fi
 
-if [[ $(get_version_component_count ${PV}) -gt 2 ]]; then
-	AMD64_URI="${NV_DEV_URI}vulkan-beta-$(delete_all_version_separators ${PV})-linux -> NVIDIA-Linux-x86_64-${PV}.run"
-else
-	AMD64_URI="${NV_URI}Linux-x86_64/${PV}/${AMD64_NV_PACKAGE}.run"
-fi
 SRC_URI="
 	amd64? ( ${AMD64_URI} )
 	tools? (
