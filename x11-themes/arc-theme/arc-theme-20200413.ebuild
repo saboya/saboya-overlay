@@ -10,14 +10,18 @@ EAPI=7
 
 inherit autotools
 
+GIT_COMMIT="91bce14474d15bf45d236b7cc83e313458f99be8"
+
 DESCRIPTION="A flat theme with transparent elements for GTK+3, GTK+2 and GNOME Shell"
-HOMEPAGE="https://github.com/arc-design/arc-theme.git"
-SRC_URI="https://github.com/arc-design/${PN}/releases/download/${PV}/${P}.tar.xz"
+HOMEPAGE="https://github.com/jnsh/arc-theme"
+SRC_URI="https://github.com/jnsh/arc-theme/archive/${GIT_COMMIT}.zip -> ${PN}-${PV}.zip"
 #	pre-rendered? ( https://dev.gentoo.org/~chewi/distfiles/${P}-pngs.tar.xz )"
 LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS="~amd64 ~arm ~x86"
 IUSE="cinnamon gnome-shell +dark +darker +light +gtk2 +gtk3 mate pre-rendered xfce"
+
+S="${WORKDIR}/${PN}-${GIT_COMMIT}"
 
 SASSC_DEPEND="
 	dev-lang/sassc
