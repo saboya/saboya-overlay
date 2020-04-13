@@ -54,6 +54,10 @@ BDEPEND="
 	)
 "
 
+PATCHES=(
+	"${FILESDIR}/3.36-symlink.patch"
+)
+
 # gnome-themes-standard is only needed by GTK+2 for the Adwaita
 # engine. This engine is built into GTK+3.
 RDEPEND="
