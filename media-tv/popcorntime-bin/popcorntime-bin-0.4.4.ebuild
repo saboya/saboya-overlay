@@ -29,7 +29,7 @@ src_install() {
 	doexe Popcorn-Time
 
 	insinto /opt/${PN}
-	doins -r src node_modules icudtl.dat locales LICENSE.txt lib nw_100_percent.pak nw_200_percent.pak package.json resources.pak snapshot_blob.bin pnacl CHANGELOG.md chromedriver credits.html minidump_stackwalk nacl_helper nacl_helper_bootstrap nacl_irt_x86_64.nexe natives_blob.bin nwjc payload README.md
+	doins -r src node_modules icudtl.dat locales LICENSE.txt lib nw_100_percent.pak nw_200_percent.pak package.json resources.pak v8_context_snapshot.bin pnacl CHANGELOG.md chromedriver credits.html minidump_stackwalk nacl_helper nacl_helper_bootstrap nacl_irt_x86_64.nexe nwjc payload README.md
 
     dosym /$(get_libdir)/libudev.so.1 /opt/${PN}/libudev.so.0
 	dosym /opt/${PN}/Popcorn-Time /usr/bin/${PN}
