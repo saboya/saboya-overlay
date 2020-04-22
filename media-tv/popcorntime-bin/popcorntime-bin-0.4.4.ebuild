@@ -12,7 +12,7 @@ SRC_URI="amd64? ( https://get.popcorntime.app/build/Popcorn-Time-${PV}-linux64.z
 
 LICENSE="GPL-3"
 SLOT="0"
-KEYWORDS="~amd64 ~x86"
+KEYWORDS="-*"
 IUSE=""
 RESTRICT="splitdebug strip"
 
