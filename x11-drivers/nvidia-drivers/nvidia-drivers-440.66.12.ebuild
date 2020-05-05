@@ -100,7 +100,6 @@ NV_KV_MAX_PLUS="5.7"
 CONFIG_CHECK="!DEBUG_MUTEXES ~!I2C_NVIDIA_GPU ~!LOCKDEP ~MTRR ~SYSVIPC ~ZONE_DMA"
 
 pkg_pretend() {
-	ewarn $(ver_rs 1- "" ${PV})
 	nvidia-driver_check
 }
 
