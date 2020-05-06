@@ -385,11 +385,11 @@ src_install() {
 		fi
 
 		insinto /usr/share/nvidia/
-		doins nvidia-application-profiles-${NV_TOOLS_PV}-key-documentation
+		doins nvidia-application-profiles-${PV}-key-documentation
 
 		insinto /etc/nvidia
 		newins \
-			nvidia-application-profiles-${NV_TOOLS_PV}-rc nvidia-application-profiles-rc
+			nvidia-application-profiles-${PV}-rc nvidia-application-profiles-rc
 
 		# There is no icon in the FreeBSD tarball.
 		use kernel_FreeBSD || \
