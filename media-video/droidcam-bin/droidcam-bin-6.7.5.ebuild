@@ -32,7 +32,7 @@ src_install() {
 	# doicon droidcam.png
 	newicon ${DISTDIR}/droidcam-icon-${PV}.png droidcam.png
 	linux-mod_src_install
-	dodoc README
+	dodoc README.md
 	# Does not exist
 	#domenu "${FILESDIR}"/droidcam.desktop
 }
