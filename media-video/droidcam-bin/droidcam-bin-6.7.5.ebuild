@@ -4,7 +4,7 @@
 
 EAPI=7
 
-inherit eutils linux-mod user
+inherit desktop eutils linux-mod user
 
 DESCRIPTION="Use your Android phone as a wireless webcam"
 HOMEPAGE="http://www.dev47apps.com/"
