@@ -465,7 +465,6 @@ src_install-libs() {
 			"libnvidia-compiler.so.${NV_SOVER}"
 			"libnvidia-eglcore.so.${NV_SOVER}"
 			"libnvidia-encode.so.${NV_SOVER}"
-			"libnvidia-fatbinaryloader.so.${NV_SOVER}"
 			"libnvidia-fbc.so.${NV_SOVER}"
 			"libnvidia-glcore.so.${NV_SOVER}"
 			"libnvidia-glsi.so.${NV_SOVER}"
