@@ -168,14 +168,11 @@ src_prepare() {
 	done
 
 	if use tools; then
-		cp "${FILESDIR}"/nvidia-settings-fno-common.patch "${WORKDIR}" || die
 		cp "${FILESDIR}"/nvidia-settings-linker.patch "${WORKDIR}" || die
 		sed -i \
 			-e "s:@PV@:${NV_TOOLS_PV}:g" \
-			"${WORKDIR}"/nvidia-settings-fno-common.patch \
 			"${WORKDIR}"/nvidia-settings-linker.patch \
 			|| die
-		eapply "${WORKDIR}"/nvidia-settings-fno-common.patch
 		eapply "${WORKDIR}"/nvidia-settings-linker.patch
 	fi
 
