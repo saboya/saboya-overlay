@@ -28,6 +28,10 @@ BUILD_TARGET_ARCH="${ARCH}"
 MODULE_NAMES="v4l2loopback-dc(kernel/drivers/media/v4l2-core:${S}/v4l2loopback)"
 RESTRICT="mirror"
 
+src_compile() {
+	linux-mod_src_compile
+}
+
 src_install() {
 	dobin droidcam droidcam-cli
 	# doicon droidcam.png
