@@ -18,7 +18,11 @@ SLOT="0"
 KEYWORDS="~amd64"
 IUSE=""
 DEPEND="net-wireless/bluez"
-RDEPEND="${DEPEND}"
+RDEPEND="
+	${DEPEND}
+	media-libs/speex
+"
+
 CONFIG_CHECK="V4L_PLATFORM_DRIVERS"
 
 S="${WORKDIR}"
