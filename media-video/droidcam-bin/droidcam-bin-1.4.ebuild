@@ -9,7 +9,7 @@ inherit desktop eutils linux-mod user
 DESCRIPTION="Use your Android phone as a wireless webcam"
 HOMEPAGE="http://www.dev47apps.com/"
 SRC_URI="
-	amd64? ( https://www.dev47apps.com/files/linux/droidcam_latest.zip -> droidcam-64bit-${PV}.zip )
+	amd64? ( https://github.com/aramg/droidcam/releases/download/v${PV}/droidcam_1593923604.zip -> droidcam-64bit-${PV}.zip )
 	https://files.dev47apps.net/img/app_icon.png -> droidcam-icon-${PV}.png"
 
 LICENSE="as-is"
