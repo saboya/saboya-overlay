@@ -47,6 +47,7 @@ src_install() {
 	# Using doins -r would strip executable bits from all binaries
 	cp -pPR "${S}" "${D}/opt/${PN}" || die "Failed to copy files"
 	dosym "${EPREFIX}/opt/${PN}/bin/code" "/usr/bin/${EXEC_NAME}"
-	make_desktop_entry "${EXEC_NAME}" "Visual Studio Code" "${PN}" "Development;IDE" "StartupWMClass=code"
+	domenu "${FILESDIR}/${PN}.desktop"
+	newicon "${S}/resources/app/resources/linux/code.png" "vscode.png"
 	newicon "${S}/resources/app/resources/linux/code.png" "${PN}.png"
 }
