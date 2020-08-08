@@ -2,7 +2,7 @@
 Name=Visual Studio Code
 Comment=Code Editing. Redefined.
 GenericName=Text Editor
-Exec=code
+Exec=vscode
 Icon=vscode
 Type=Application
 StartupNotify=true
