@@ -49,7 +49,16 @@ src_install(){
 	dosym ../../opt/${MY_PN}/bin/codium /usr/bin/${MY_PN}
 	dosym ../../opt/${MY_PN}/bin/codium /usr/bin/codium
 	domenu "${FILESDIR}/${PN}.desktop"
-    #make_desktop_entry "${EXEC_NAME}" "Visual Studio Code" "${PN}" "Development;IDE" "StartupWMClass=codium"
 	newicon "resources/app/resources/linux/code.png" ${MY_PN}.png
 	pax-mark m "${ED%/}"/opt/${MY_PN}/codium
+}
+
+pkg_postinst(){
+	xdg_desktop_database_update
+	xdg_mimeinfo_database_update
+}
+
+pkg_postrm(){
+	xdg_desktop_database_update
+	xdg_mimeinfo_database_update
 }
