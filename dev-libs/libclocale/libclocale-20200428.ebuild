@@ -1,9 +1,9 @@
-# Copyright 1999-2019 Gentoo Authors
+# Copyright 1999-2020 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=7
 
-DESCRIPTION="Library for cross-platform C path functions"
+DESCRIPTION="Library for cross-platform C locale functions"
 HOMEPAGE="https://github.com/libyal/${PN}"
 SRC_URI="https://github.com/libyal/${PN}/releases/download/${PV}/${PN}-alpha-${PV}.tar.gz"
 
@@ -13,10 +13,8 @@ KEYWORDS="~amd64 ~arm64 ~x86"
 IUSE="nls unicode"
 
 DEPEND="dev-libs/libcerror
-	dev-libs/libclocale
-	dev-libs/libcsplit
-	dev-libs/libuna"
-
+	nls? ( virtual/libiconv
+		virtual/libintl )"
 RDEPEND="${DEPEND}"
 
 src_configure() {
@@ -24,4 +22,6 @@ src_configure() {
 		$(use_with nls libiconv-prefix) \
 		$(use_with nls libintl-prefix) \
 		$(use_enable unicode wide-character-type)
+		# \
+#		--with-libcerror
 }

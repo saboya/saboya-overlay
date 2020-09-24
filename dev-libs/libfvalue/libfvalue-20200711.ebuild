@@ -1,13 +1,12 @@
-# Copyright 1999-2017 Gentoo Foundation
+# Copyright 1999-2020 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI=6
+EAPI=7
 
-inherit versionator autotools
+inherit autotools
 
-MY_PV="$(get_major_version)"
+MY_PV="$(ver_cut 1)"
 MY_PV2="experimental"
-#$(get_after_major_version)"
 
 DESCRIPTION="Library for generic file value functions"
 HOMEPAGE="https://github.com/libyal/${PN}"
@@ -15,7 +14,7 @@ SRC_URI="https://github.com/libyal/${PN}/releases/download/${MY_PV}/${PN}-${MY_P
 
 LICENSE="LGPL-3"
 SLOT="0"
-KEYWORDS="~amd64 ~hppa ~ppc ~x86"
+KEYWORDS="~amd64 ~arm64 ~x86"
 IUSE="debug nls"
 
 DEPEND="dev-libs/libcdata
@@ -36,9 +35,9 @@ src_configure() {
 		$(use_with nls libiconv-prefix) \
 		$(use_with nls libintl-prefix) \
 		$(use_enable debug debug-output) \
-		$(use_enable debug verbose-output) \
-		--with-libcdata --with-libcerror \
-		--with-libcnotify --with-libcthreads \
-		--with-libfdatetime --with-libfguid \
-		--with-libfwnt --with-libuna
+		$(use_enable debug verbose-output)
+#		--with-libcdata --with-libcerror \
+#		--with-libcnotify --with-libcthreads \
+#		--with-libfdatetime --with-libfguid \
+#		--with-libfwnt --with-libuna
 }
