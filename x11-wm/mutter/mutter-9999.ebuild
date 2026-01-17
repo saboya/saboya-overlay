@@ -19,7 +19,7 @@ else
 	SLOT="0/$(($(ver_cut 1) - 32))" # 0/libmutter_api_version - ONLY gnome-shell (or anything using mutter-clutter-<api_version>.pc) should use the subslot
 fi
 
-IUSE="bash-completion debug elogind gnome gtk-doc input_devices_wacom +introspection screencast sysprof systemd test udev wayland X +xwayland video_cards_nvidia"
+IUSE="bash-completion debug elogind gles2 gnome gtk-doc input_devices_wacom +introspection screencast sysprof systemd test udev wayland X +xwayland video_cards_nvidia"
 # native backend requires gles3 for hybrid graphics blitting support, udev and a logind provider
 REQUIRED_USE="
 	|| ( X wayland )
@@ -170,10 +170,9 @@ src_configure() {
 		# Mutter dropped the X11 renderer, so no more USE glx
 
 		-Dopengl=true
-		$(meson_use wayland gles2)
+		$(meson_use gles2)
 		#gles2_libname
 		-Degl=true
-		$(meson_use wayland)
 		-Dfonts=true
 	)
 
