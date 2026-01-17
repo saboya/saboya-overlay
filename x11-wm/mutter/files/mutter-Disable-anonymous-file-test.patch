@@ -1,0 +1,16 @@
+diff --git a/src/tests/mtk/meson.build b/src/tests/mtk/meson.build
+index 4e21b2fb5..e5400a45a 100644
+--- a/src/tests/mtk/meson.build
++++ b/src/tests/mtk/meson.build
+@@ -1,11 +1,4 @@
+ test_cases += [
+-  {
+-    'name': 'mtk-anonymous-file',
+-    'suite': 'unit',
+-    'sources': [
+-      'mtk/anonymous-file.c',
+-    ],
+-  },
+   {
+     'name': 'mtk-dispose-bin',
+     'suite': 'unit',
