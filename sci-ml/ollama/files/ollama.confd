@@ -1,0 +1,9 @@
+# log to syslog
+# output_logger="logger -t \"$RC_SVCNAME\" -p daemon.info"
+# error_logger="logger -t \"$RC_SVCNAME\" -p daemon.err"
+
+# log to file
+output_log="/var/log/ollama/ollama.log"
+error_log="/var/log/ollama/ollama.log"
+
+# see output of `ollama help serve` for more vars
