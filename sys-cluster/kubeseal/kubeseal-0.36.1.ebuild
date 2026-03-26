@@ -10,7 +10,7 @@ MY_P="${MY_PN}-${PV}"
 DESCRIPTION="Client-side utility for one-way encrypted secrets in kubernetes"
 HOMEPAGE="https://github.com/bitnami-labs/sealed-secrets"
 SRC_URI="https://github.com/bitnami-labs/${MY_PN}/archive/v${PV}.tar.gz -> ${MY_P}.tar.gz"
-SRC_URI+=" https://github.com/saboya/saboya-overlay/releases/download/sealed-secrets-0.36.1/sealed-secrets-${PV}-vendor.tar.xz"
+SRC_URI+=" https://github.com/saboya/saboya-overlay/releases/download/sealed-secrets-${PV}/sealed-secrets-${PV}-deps.tar.xz"
 
 S="${WORKDIR}/${MY_P}"
 
