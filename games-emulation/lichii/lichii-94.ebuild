@@ -31,6 +31,7 @@ IUSE="cli +cubeb +opengl +reshade"
 # Upstream unconditionally disables BUILD_TESTING and ENABLE_TESTING.
 RESTRICT="test"
 
+# Require minizip-ng too, so QuaZip does not pull in sys-libs/zlib via virtual/minizip.
 RDEPEND="
 	app-arch/lz4:=
 	dev-cpp/cpp-httplib:=[ssl,-mbedtls]
@@ -47,7 +48,8 @@ RDEPEND="
 	media-libs/vulkan-loader
 	media-video/ffmpeg:=[opus]
 	>=net-libs/enet-1.3:1.3=
-	virtual/zlib:=
+	sys-libs/minizip-ng[compat]
+	sys-libs/zlib-ng:=[compat]
 	cubeb? ( media-libs/cubeb )
 "
 DEPEND="
