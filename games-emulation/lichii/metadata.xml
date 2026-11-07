@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<maintainer type="person">
+		<email>saboya@users.noreply.github.com</email>
+		<name>Rodrigo Saboya</name>
+	</maintainer>
+	<use>
+		<flag name="cli">Build the SDL command-line frontend (lichii-cli)</flag>
+		<flag name="cubeb">Enable the Cubeb audio backend in addition to SDL audio</flag>
+		<flag name="reshade">Enable ReShade FX post-processing effects</flag>
+	</use>
+	<upstream>
+		<remote-id type="github">zortos293/Lichii</remote-id>
+	</upstream>
+</pkgmetadata>
