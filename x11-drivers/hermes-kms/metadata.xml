@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<maintainer type="person">
+		<email>saboya@users.noreply.github.com</email>
+		<name>Rodrigo Saboya</name>
+	</maintainer>
+	<use>
+		<flag name="tools">Install the hermes-kmsctl administration utility</flag>
+	</use>
+	<upstream><remote-id type="github">MrOz59/Hermes-KMS</remote-id></upstream>
+</pkgmetadata>

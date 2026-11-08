@@ -117,6 +117,9 @@ udev's `uaccess` rules grant access to the active local user.
   and release submodule revisions are pinned and verified by the Manifest.
 - The experimental PyroWave codec and privileged card/session brokers are not
   included. Their automatic dependency detection is disabled.
-- Hermes-KMS and EVDI kernel drivers are **not** installed or automatically
-  loaded. Virtual displays require separately installed drivers compatible
-  with the Hermes version. Existing-monitor streaming does not need them.
+- Hermes-KMS and EVDI kernel drivers are **not** installed by Hermes itself.
+  This overlay provides `x11-drivers/hermes-kms-0.4.1` separately, with module
+  defaults and udev access rules for existing-session virtual displays; see
+  `x11-drivers/hermes-kms/README.md`. It is not loaded during installation,
+  but its modules-load file requests loading on subsequent boots.
+  Existing-monitor streaming does not need a virtual-display driver.
