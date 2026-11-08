@@ -6,6 +6,7 @@
 		<name>Rodrigo Saboya</name>
 	</maintainer>
 	<use>
+		<flag name="webui">Build the browser management UI using npm; disabling this leaves the HTTPS API enabled</flag>
 		<flag name="cuda">Build NVIDIA CUDA/NvFBC capture support</flag>
 		<flag name="kms">Enable direct KMS capture and grant CAP_SYS_ADMIN to the executable</flag>
 		<flag name="trayicon">Build the Qt system tray icon</flag>

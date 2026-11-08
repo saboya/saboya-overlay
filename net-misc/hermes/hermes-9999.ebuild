@@ -19,7 +19,7 @@ EGIT_SUBMODULES=(
 
 LICENSE="GPL-3 BSD BSD-2 MIT LGPL-2.1+"
 SLOT="0"
-IUSE="cuda +kms +systemd +trayicon +vaapi +wayland +X"
+IUSE="cuda +kms +systemd +trayicon +vaapi +wayland +webui +X"
 REQUIRED_USE="|| ( cuda kms wayland X )"
 RESTRICT="test"
 
@@ -73,12 +73,12 @@ DEPEND="
 "
 BDEPEND="
 	>=dev-build/cmake-3.24
-	net-libs/nodejs[npm]
+	webui? ( net-libs/nodejs[npm] )
 	virtual/pkgconfig
 	wayland? ( dev-util/wayland-scanner )
 "
 
-PATCHES=( "${FILESDIR}/${PN}-9999-system-build.patch" "${FILESDIR}/${PN}-system-libraries.patch" "${FILESDIR}/${PN}-nvenc-13.patch" )
+PATCHES=( "${FILESDIR}/${PN}-9999-system-build.patch" "${FILESDIR}/${PN}-system-libraries.patch" "${FILESDIR}/${PN}-nvenc-13.patch" "${FILESDIR}/${PN}-optional-webui.patch" )
 
 # Vite writes the web assets in the build tree, while npm needs a writable source tree.
 CMAKE_IN_SOURCE_BUILD=1
@@ -89,8 +89,10 @@ src_unpack() {
 
 	# Like Gentoo's live Sunshine ebuild, fetch npm dependencies in the network-enabled
 	# unpack phase, never during configure/compile. Live sources have no lockfile.
-	cd "${S}" || die
-	npm_config_cache="${T}/npm-cache" npm install --ignore-scripts --no-audit --no-fund || die
+	if use webui; then
+		cd "${S}" || die
+		npm_config_cache="${T}/npm-cache" npm install --ignore-scripts --no-audit --no-fund || die
+	fi
 }
 
 src_prepare() {
@@ -112,6 +114,7 @@ src_configure() {
 
 	# Avoid mixing system FFmpeg headers with the private CBS headers.
 	local mycmakeargs=(
+		-DHERMES_BUILD_WEBUI=$(usex webui)
 		-Dlibvirtualhid_DIR="${ESYSROOT}/usr/$(get_libdir)/libvirtualhid-hermes/cmake/libvirtualhid"
 		-DBUILD_SHARED_LIBS=OFF
 		-DBUILD_DOCS=OFF
@@ -176,6 +179,10 @@ pkg_postinst() {
 	elog "Run Hermes as your desktop user, not root: hermes"
 	use systemd && elog "Or start the user service: systemctl --user enable --now hermes.service"
 	elog "Configure and pair Moonlight at https://localhost:47990"
+	if ! use webui; then
+		elog "Browser management pages were disabled with -webui; the HTTPS API remains enabled."
+		elog "Configure Hermes using its config files and authenticated API instead."
+	fi
 	elog "Load uinput and uhid (or reboot) to enable virtual controller input."
 	elog "For existing-monitor streaming, set virtual_display_backend = none."
 	elog "Hermes-KMS/EVDI drivers are separate; privileged isolated-session brokers"

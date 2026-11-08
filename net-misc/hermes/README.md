@@ -51,6 +51,36 @@ Open <https://localhost:47990> to create credentials and pair Moonlight/Hestia.
 The initial certificate is self-signed. Do not expose the administration UI
 directly to the public internet.
 
+### Building without the browser UI
+
+Add this to `/etc/portage/package.use/hermes`:
+
+```text
+net-misc/hermes -webui
+```
+
+Then rebuild Hermes. This skips npm entirely, removes the Node.js build
+dependency, and does not install the browser pages. The streaming host and
+HTTPS administration API are still built; this is not a way to disable the
+administration server or its authentication.
+
+Without the pages, configuration and pairing need to be managed through
+`~/.config/hermes/hermes.conf`, `apps.json`, and the API. Set API credentials
+with `hermes --creds USER PASSWORD` while the host is stopped (the password is
+visible in the command's process arguments). Pairing can then be approved
+through `POST /api/pin` with HTTP Basic authentication, for example:
+
+```sh
+curl --insecure --user USER --header 'Content-Type: application/json' \
+    --data '{"pin":"1234","name":"Steam Deck"}' https://localhost:47990/api/pin
+```
+
+Use the PIN displayed by Moonlight; curl prompts for the password. The
+`--insecure` option here accommodates the default self-signed local certificate.
+The browser UI is recommended if you prefer interactive configuration. With
+`webui` enabled, npm's current unpack-time downloads still require network
+access; a locked, fetch-phase dependency scheme has not yet been implemented.
+
 For streaming an existing monitor, select `virtual_display_backend = none`.
 Stop any other Sunshine/Apollo host using the same streaming ports.
 

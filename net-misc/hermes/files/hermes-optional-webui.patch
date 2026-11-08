@@ -1,0 +1,35 @@
+Allow building the streaming host without Node.js or browser UI assets.
+The configuration HTTP API remains available.
+
+--- a/cmake/targets/common.cmake
++++ b/cmake/targets/common.cmake
+@@ -60,6 +60,8 @@
+ endif()
+ 
+ #WebUI build
++option(HERMES_BUILD_WEBUI "Build and install browser management UI" ON)
++if(HERMES_BUILD_WEBUI)
+ find_program(NPM npm REQUIRED)
+ 
+ if (NPM_OFFLINE)
+@@ -75,6 +77,7 @@
+         COMMAND "${CMAKE_COMMAND}" -E env "SUNSHINE_BUILD_HOMEBREW=${NPM_BUILD_HOMEBREW}" "SUNSHINE_SOURCE_ASSETS_DIR=${NPM_SOURCE_ASSETS_DIR}" "SUNSHINE_ASSETS_DIR=${NPM_ASSETS_DIR}" "$<$<BOOL:${WIN32}>:cmd;/C>" "${NPM}" run build  # cmake-lint: disable=C0301
+         COMMAND_EXPAND_LISTS
+         VERBATIM)
++endif()
+ 
+ # docs
+ if(BUILD_DOCS)
+--- a/cmake/packaging/common.cmake
++++ b/cmake/packaging/common.cmake
+@@ -30,8 +30,10 @@
+ endforeach()
+ 
+ # install built vite assets
++if(HERMES_BUILD_WEBUI)
+ install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/assets/web"
+         DESTINATION "${SUNSHINE_ASSETS_DIR}")
++endif()
+ 
+ # platform specific packaging
+ if(WIN32)
