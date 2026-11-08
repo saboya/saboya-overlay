@@ -1,0 +1,75 @@
+# Hermes streaming host
+
+The release ebuild packages <https://github.com/MrOz59/Hermes> v0.7.0;
+the live (`9999`) ebuild tracks `main`.
+It is unrelated to Gentoo's `dev-util/hermes` testing framework.
+
+## Install
+
+Accept the release ebuild in `/etc/portage/package.accept_keywords`:
+
+```text
+=net-misc/hermes-0.7.0 ~amd64
+```
+
+Then install it:
+
+```sh
+emerge --ask net-misc/hermes
+```
+
+To build from an existing local clone without changing the ebuild:
+
+```sh
+EGIT_OVERRIDE_REPO_MROZ59_HERMES=/home/saboya/projects/oss/Hermes \
+    ebuild net-misc/hermes/hermes-9999.ebuild clean install
+```
+
+The `install` phase only stages files; it does not merge them onto the system.
+Dependencies must already be installed when testing with `ebuild`.
+
+## First run
+
+Run Hermes in the desktop user's session, never as root:
+
+```sh
+hermes
+```
+
+With `USE=systemd`, the package also installs a user service:
+
+```sh
+systemctl --user enable --now hermes.service
+```
+
+Open <https://localhost:47990> to create credentials and pair Moonlight/Hestia.
+The initial certificate is self-signed. Do not expose the administration UI
+directly to the public internet.
+
+For streaming an existing monitor, select `virtual_display_backend = none`.
+Stop any other Sunshine/Apollo host using the same streaming ports.
+
+Virtual controllers need the `uinput` and `uhid` kernel modules and access to
+their device nodes. The package installs udev rules and a modules-load file;
+after the first install, load the modules or reboot. On systemd desktops,
+udev's `uaccess` rules grant access to the active local user.
+
+## Scope
+
+- KMS capture (`USE=kms`) grants `CAP_SYS_ADMIN` to `/usr/bin/hermes` through
+  Gentoo's `filecaps` support. Disable `kms` to avoid that capability if another
+  capture backend works for your compositor.
+- FFmpeg is compiled privately from source, including its internal CBS API;
+  this does not replace the system FFmpeg installation. Software H.264 and
+  NVENC encoders are built, with VAAPI encoders controlled by `USE=vaapi`.
+- `USE=cuda` adds CUDA/NvFBC capture and requires a compatible CUDA compiler.
+- The npm dependencies are downloaded during `src_unpack`; configure and
+  compile run offline. Neither ebuild currently provides a separately versioned
+  npm dependency archive or lockfile; npm's transitive dependency resolution
+  can therefore change even for the release ebuild. All C/C++ source archives
+  and release submodule revisions are pinned and verified by the Manifest.
+- The experimental PyroWave codec and privileged card/session brokers are not
+  included. Their automatic dependency detection is disabled.
+- Hermes-KMS and EVDI kernel drivers are **not** installed or automatically
+  loaded. Virtual displays require separately installed drivers compatible
+  with the Hermes version. Existing-monitor streaming does not need them.

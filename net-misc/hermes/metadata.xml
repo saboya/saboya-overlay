@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<maintainer type="person">
+		<email>saboya@users.noreply.github.com</email>
+		<name>Rodrigo Saboya</name>
+	</maintainer>
+	<use>
+		<flag name="cuda">Build NVIDIA CUDA/NvFBC capture support</flag>
+		<flag name="kms">Enable direct KMS capture and grant CAP_SYS_ADMIN to the executable</flag>
+		<flag name="trayicon">Build the Qt system tray icon</flag>
+	</use>
+	<upstream>
+		<remote-id type="github">MrOz59/Hermes</remote-id>
+	</upstream>
+</pkgmetadata>

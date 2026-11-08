@@ -1,0 +1,58 @@
+Build against distro dependencies and a private FFmpeg compiled from source.
+Do not download Boost, and keep optional PyroWave detection deterministic.
+
+--- a/cmake/dependencies/Boost_Sunshine.cmake
++++ b/cmake/dependencies/Boost_Sunshine.cmake
+@@ -30,7 +30,7 @@
+ if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.30")
+     cmake_policy(SET CMP0167 NEW)  # Get BoostConfig.cmake from upstream
+ endif()
+-find_package(Boost CONFIG ${BOOST_VERSION} EXACT COMPONENTS ${BOOST_COMPONENTS})
++find_package(Boost CONFIG ${BOOST_VERSION} REQUIRED COMPONENTS ${BOOST_COMPONENTS})
+ if(NOT Boost_FOUND)
+     message(STATUS "Boost v${BOOST_VERSION} package not found in the system. Falling back to FetchContent.")
+     include(FetchContent)
+--- a/cmake/dependencies/common.cmake
++++ b/cmake/dependencies/common.cmake
+@@ -26,7 +26,7 @@
+ # library retain the existing H.264/HEVC/AV1 paths unchanged.
+ option(SUNSHINE_REQUIRE_PYROWAVE "Fail configuration when the optional PyroWave SDK is unavailable" OFF)
+ option(SUNSHINE_BUNDLE_PYROWAVE "Install the PyroWave runtime privately with Hermes" OFF)
+-pkg_check_modules(PYROWAVE QUIET IMPORTED_TARGET pyrowave-shared>=0.5)
++set(PYROWAVE_FOUND OFF)
+ if(SUNSHINE_REQUIRE_PYROWAVE AND NOT PYROWAVE_FOUND)
+     message(FATAL_ERROR "PyroWave was required but pyrowave-shared >= 0.5 was not found")
+ endif()
+@@ -40,7 +40,16 @@
+ include_directories(SYSTEM ${MINIUPNP_INCLUDE_DIRS})
+ 
+ # ffmpeg pre-compiled binaries
+-if(NOT DEFINED FFMPEG_PREPARED_BINARIES)
++if(DEFINED HERMES_FFMPEG_PREFIX)
++    set(FFMPEG_LIBRARIES
++        "${HERMES_FFMPEG_PREFIX}/lib/libavcodec.a"
++        "${HERMES_FFMPEG_PREFIX}/lib/libswscale.a"
++        "${HERMES_FFMPEG_PREFIX}/lib/libavutil.a"
++        x264 m dl)
++    if(SUNSHINE_ENABLE_VAAPI)
++        list(APPEND FFMPEG_LIBRARIES va va-drm)
++    endif()
++elseif(NOT DEFINED FFMPEG_PREPARED_BINARIES)
+     if(WIN32)
+         set(FFMPEG_PLATFORM_LIBRARIES mfplat ole32 strmiids mfuuid vpl)
+     elseif(UNIX AND NOT APPLE)
+@@ -81,8 +90,12 @@
+         ${FFMPEG_PLATFORM_LIBRARIES})
+ endif()
+ 
+-set(FFMPEG_INCLUDE_DIRS
+-        "${FFMPEG_PREPARED_BINARIES}/include")
++if(DEFINED HERMES_FFMPEG_PREFIX)
++    set(FFMPEG_INCLUDE_DIRS "${HERMES_FFMPEG_SOURCE}")
++else()
++    set(FFMPEG_INCLUDE_DIRS
++            "${FFMPEG_PREPARED_BINARIES}/include")
++endif()
+ 
+ # platform specific dependencies
+ if(WIN32)
