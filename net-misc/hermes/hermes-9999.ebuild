@@ -11,23 +11,11 @@ EGIT_REPO_URI="https://github.com/MrOz59/Hermes.git"
 EGIT_BRANCH="main"
 EGIT_SUBMODULES=(
 	third-party/Simple-Web-Server
-	third-party/libdisplaydevice
 	third-party/moonlight-common-c
-	third-party/moonlight-common-c/enet
 	third-party/nanors
-	third-party/nv-codec-headers
 	third-party/tray
-	third-party/wlr-protocols
 )
 
-# FFmpeg's private CBS API is required; the shared system library cannot provide it.
-FFMPEG_VERSION="7.1.5"
-VIRTUALHID_COMMIT="14ee6c4717d32b678c2983bfa6c54019b944d421"
-SRC_URI="
-	https://ffmpeg.org/releases/ffmpeg-${FFMPEG_VERSION}.tar.xz
-	https://github.com/MrOz59/libvirtualhid/archive/${VIRTUALHID_COMMIT}.tar.gz
-		-> hermes-libvirtualhid-${VIRTUALHID_COMMIT}.tar.gz
-"
 
 LICENSE="GPL-3 BSD BSD-2 MIT LGPL-2.1+"
 SLOT="0"
@@ -70,23 +58,27 @@ RDEPEND="
 DEPEND="
 	${RDEPEND}
 	>=dev-cpp/nlohmann_json-3.11
+	=dev-libs/libdisplaydevice-0_p20250812
+	=dev-libs/libvirtualhid-hermes-0_p20261025[X?]
+	=net-libs/moonlight-enet-0_p20250704
+	=media-libs/hermes-ffmpeg-7.1.5:7=[vaapi=]
 	dev-util/vulkan-headers
 	=media-libs/nv-codec-headers-13*
 	cuda? ( >=dev-util/nvidia-cuda-toolkit-12 )
 	wayland? (
+		>=gui-libs/wlr-protocols-0_p20260309
 		>=dev-libs/wayland-protocols-1.38
 		dev-libs/plasma-wayland-protocols
 	)
 "
 BDEPEND="
 	>=dev-build/cmake-3.24
-	dev-lang/nasm
 	net-libs/nodejs[npm]
 	virtual/pkgconfig
 	wayland? ( dev-util/wayland-scanner )
 "
 
-PATCHES=( "${FILESDIR}/${PN}-9999-system-build.patch" )
+PATCHES=( "${FILESDIR}/${PN}-9999-system-build.patch" "${FILESDIR}/${PN}-system-libraries.patch" "${FILESDIR}/${PN}-nvenc-13.patch" )
 
 # Vite writes the web assets in the build tree, while npm needs a writable source tree.
 CMAKE_IN_SOURCE_BUILD=1
@@ -114,50 +106,13 @@ src_prepare() {
 }
 
 src_configure() {
-	local ffmpeg_prefix="${WORKDIR}/ffmpeg-install"
-	local ffmpeg_args=(
-		--prefix="${ffmpeg_prefix}"
-		--libdir="${ffmpeg_prefix}/lib"
-		--cc="$(tc-getCC)"
-		--cxx="$(tc-getCXX)"
-		--ar="$(tc-getAR)"
-		--nm="$(tc-getNM)"
-		--ranlib="$(tc-getRANLIB)"
-		--pkg-config="$(tc-getPKG_CONFIG)"
-		--extra-cflags="${CFLAGS}"
-		--extra-ldflags="${LDFLAGS}"
-		--disable-all
-		--disable-autodetect
-		--disable-doc
-		--disable-programs
-		--disable-debug
-		--disable-stripping
-		--disable-shared
-		--enable-static
-		--enable-pic
-		--enable-avcodec
-		--enable-avutil
-		--enable-swscale
-		--enable-gpl
-		--enable-libx264
-		--enable-encoder=libx264
-		# Compile the CBS implementations into libavcodec itself.
-		--enable-bsf=h264_metadata,hevc_metadata,av1_metadata
-		$(use_enable vaapi)
-		$(usev vaapi --enable-encoder=h264_vaapi,hevc_vaapi,av1_vaapi)
-		--enable-ffnvcodec
-		--enable-nvenc
-		--enable-encoder=h264_nvenc,hevc_nvenc,av1_nvenc
-	)
-	if tc-is-cross-compiler; then
-		ffmpeg_args+=( --enable-cross-compile --arch="$(tc-arch-kernel)" --target-os=linux --cross-prefix="${CHOST}-" --host-cc="$(tc-getBUILD_CC)" )
-	fi
-	pushd "${WORKDIR}/ffmpeg-${FFMPEG_VERSION}" >/dev/null || die
-	./configure "${ffmpeg_args[@]}" || die
-	popd >/dev/null || die
+	local ffmpeg_prefix
+	ffmpeg_prefix=$($(tc-getPKG_CONFIG) --variable=sdkdir hermes-ffmpeg-7) || die
+	[[ -n ${ffmpeg_prefix} ]] || die "Hermes FFmpeg SDK not found"
 
 	# Avoid mixing system FFmpeg headers with the private CBS headers.
 	local mycmakeargs=(
+		-Dlibvirtualhid_DIR="${ESYSROOT}/usr/$(get_libdir)/libvirtualhid-hermes/cmake/libvirtualhid"
 		-DBUILD_SHARED_LIBS=OFF
 		-DBUILD_DOCS=OFF
 		-DBUILD_TESTS=OFF
@@ -165,11 +120,8 @@ src_configure() {
 		-DBUILD_WERROR=OFF
 		-DBOOST_USE_STATIC=OFF
 		-DFETCHCONTENT_FULLY_DISCONNECTED=ON
-		-DFETCHCONTENT_SOURCE_DIR_HERMES_LIBVIRTUALHID="${WORKDIR}/libvirtualhid-${VIRTUALHID_COMMIT}"
-		-DLIBVIRTUALHID_ENABLE_XTEST=$(usex X)
-		-DLIBVIRTUALHID_WARNINGS_AS_ERRORS=OFF
 		-DHERMES_FFMPEG_PREFIX="${ffmpeg_prefix}"
-		-DHERMES_FFMPEG_SOURCE="${WORKDIR}/ffmpeg-${FFMPEG_VERSION}"
+		-DHERMES_FFMPEG_SOURCE="${ffmpeg_prefix}/include"
 		-DSUNSHINE_ASSETS_DIR="share/${PN}"
 		-DSUNSHINE_EXECUTABLE_PATH="${EPREFIX}/usr/bin/hermes"
 		-DSUNSHINE_ENABLE_CUDA=$(usex cuda)
@@ -193,8 +145,6 @@ src_configure() {
 }
 
 src_compile() {
-	emake -C "${WORKDIR}/ffmpeg-${FFMPEG_VERSION}"
-	emake -C "${WORKDIR}/ffmpeg-${FFMPEG_VERSION}" install
 	local -x npm_config_offline=true npm_config_cache="${T}/npm-cache"
 	cmake_src_compile
 }

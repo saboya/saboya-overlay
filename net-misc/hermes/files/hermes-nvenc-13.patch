@@ -1,0 +1,27 @@
+Adapt the encoder configuration to the system Video Codec SDK 13 headers.
+SDK 13 replaced the legacy *BitDepthMinus8 fields with NV_ENC_BIT_DEPTH.
+
+--- a/src/nvenc/nvenc_base.cpp
++++ b/src/nvenc/nvenc_base.cpp
+@@ -23,1 +23,1 @@
+-#if NVENCAPI_VERSION != MAKE_NVENC_VER(12U, 0U)
++#if NVENCAPI_MAJOR_VERSION != 13
+@@ -327,3 +327,7 @@
+           if (buffer_is_10bit()) {
+-            format_config.pixelBitDepthMinus8 = 2;
++            format_config.inputBitDepth = NV_ENC_BIT_DEPTH_10;
++            format_config.outputBitDepth = NV_ENC_BIT_DEPTH_10;
++          } else {
++            format_config.inputBitDepth = NV_ENC_BIT_DEPTH_8;
++            format_config.outputBitDepth = NV_ENC_BIT_DEPTH_8;
+           }
+@@ -360,4 +364,7 @@
+           if (buffer_is_10bit()) {
+-            format_config.inputPixelBitDepthMinus8 = 2;
+-            format_config.pixelBitDepthMinus8 = 2;
++            format_config.inputBitDepth = NV_ENC_BIT_DEPTH_10;
++            format_config.outputBitDepth = NV_ENC_BIT_DEPTH_10;
++          } else {
++            format_config.inputBitDepth = NV_ENC_BIT_DEPTH_8;
++            format_config.outputBitDepth = NV_ENC_BIT_DEPTH_8;
+           }

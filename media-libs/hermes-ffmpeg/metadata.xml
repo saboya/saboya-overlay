@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<maintainer type="person">
+		<email>saboya@users.noreply.github.com</email>
+		<name>Rodrigo Saboya</name>
+	</maintainer>
+	<longdescription>
+		A minimal static FFmpeg SDK exposing the private coded-bitstream APIs used
+		by Hermes. Headers, archives and FFmpeg's pkg-config files are isolated
+		under a versioned SDK directory and do not replace system FFmpeg.
+	</longdescription>
+</pkgmetadata>

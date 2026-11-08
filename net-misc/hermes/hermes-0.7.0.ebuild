@@ -8,29 +8,17 @@ inherit cmake fcaps optfeature systemd toolchain-funcs udev xdg
 DESCRIPTION="Apollo-derived game streaming host for Moonlight and Hestia"
 HOMEPAGE="https://github.com/MrOz59/Hermes"
 
-FFMPEG_VERSION="7.1.5"
-VIRTUALHID_COMMIT="14ee6c4717d32b678c2983bfa6c54019b944d421"
 SWS_COMMIT="5b29c7004cc53252a8eff06d62899c8847ada971"
-DISPLAYDEVICE_COMMIT="f31e46d8736fa6932d34c1417111e60ca507b29f"
 MOONLIGHT_COMMIT="c999436858471dfefa7617af3b7dc03ec1644ce4"
-ENET_COMMIT="115a10baa1d7f291ff5b870765610fd3b4a6e43c"
 NANORS_COMMIT="19f07b513e924e471cadd141943c1ec4adc8d0e0"
-NVCODEC_COMMIT="87f7b045326f596268b1ab12fdc5867962324e8d"
 TRAY_COMMIT="cedbffd3f88c8916547347bab051e4c072b8d0f3"
-WLR_COMMIT="bf4fc79abc359eea5a0edec0ac6d4a2b2955f82a"
 
 SRC_URI="
 	https://github.com/MrOz59/Hermes/archive/refs/tags/v${PV}.tar.gz -> ${P}.tar.gz
-	https://ffmpeg.org/releases/ffmpeg-${FFMPEG_VERSION}.tar.xz
-	https://github.com/MrOz59/libvirtualhid/archive/${VIRTUALHID_COMMIT}.tar.gz -> hermes-libvirtualhid-${VIRTUALHID_COMMIT}.tar.gz
 	https://github.com/ClassicOldSong/Simple-Web-Server/archive/${SWS_COMMIT}.tar.gz -> hermes-simple-web-server-${SWS_COMMIT}.tar.gz
-	https://github.com/LizardByte/libdisplaydevice/archive/${DISPLAYDEVICE_COMMIT}.tar.gz -> libdisplaydevice-${DISPLAYDEVICE_COMMIT}.tar.gz
 	https://github.com/ClassicOldSong/moonlight-common-c/archive/${MOONLIGHT_COMMIT}.tar.gz -> hermes-moonlight-common-c-${MOONLIGHT_COMMIT}.tar.gz
-	https://github.com/cgutman/enet/archive/${ENET_COMMIT}.tar.gz -> moonlight-enet-${ENET_COMMIT}.tar.gz
 	https://github.com/sleepybishop/nanors/archive/${NANORS_COMMIT}.tar.gz -> nanors-${NANORS_COMMIT}.tar.gz
-	https://github.com/FFmpeg/nv-codec-headers/archive/${NVCODEC_COMMIT}.tar.gz -> nv-codec-headers-${NVCODEC_COMMIT}.tar.gz
 	https://github.com/LizardByte/tray/archive/${TRAY_COMMIT}.tar.gz -> hermes-tray-${TRAY_COMMIT}.tar.gz
-	https://gitlab.freedesktop.org/wlroots/wlr-protocols/-/archive/${WLR_COMMIT}/wlr-protocols-${WLR_COMMIT}.tar.bz2
 "
 S="${WORKDIR}/Hermes-${PV}"
 
@@ -76,23 +64,27 @@ RDEPEND="
 DEPEND="
 	${RDEPEND}
 	>=dev-cpp/nlohmann_json-3.11
+	=dev-libs/libdisplaydevice-0_p20250812
+	=dev-libs/libvirtualhid-hermes-0_p20261025[X?]
+	=net-libs/moonlight-enet-0_p20250704
+	=media-libs/hermes-ffmpeg-7.1.5:7=[vaapi=]
 	dev-util/vulkan-headers
 	=media-libs/nv-codec-headers-13*
 	cuda? ( >=dev-util/nvidia-cuda-toolkit-12 )
 	wayland? (
+		>=gui-libs/wlr-protocols-0_p20260309
 		>=dev-libs/wayland-protocols-1.38
 		dev-libs/plasma-wayland-protocols
 	)
 "
 BDEPEND="
 	>=dev-build/cmake-3.24
-	dev-lang/nasm
 	net-libs/nodejs[npm]
 	virtual/pkgconfig
 	wayland? ( dev-util/wayland-scanner )
 "
 
-PATCHES=( "${FILESDIR}/${PN}-9999-system-build.patch" )
+PATCHES=( "${FILESDIR}/${PN}-9999-system-build.patch" "${FILESDIR}/${PN}-system-libraries.patch" "${FILESDIR}/${PN}-nvenc-13.patch" )
 CMAKE_IN_SOURCE_BUILD=1
 
 src_unpack() {
@@ -101,20 +93,15 @@ src_unpack() {
 	# revisions recorded by v0.7.0, without fetching unrelated submodules.
 	local modules=(
 		"Simple-Web-Server-${SWS_COMMIT}:Simple-Web-Server"
-		"libdisplaydevice-${DISPLAYDEVICE_COMMIT}:libdisplaydevice"
 		"moonlight-common-c-${MOONLIGHT_COMMIT}:moonlight-common-c"
 		"nanors-${NANORS_COMMIT}:nanors"
-		"nv-codec-headers-${NVCODEC_COMMIT}:nv-codec-headers"
 		"tray-${TRAY_COMMIT}:tray"
-		"wlr-protocols-${WLR_COMMIT}:wlr-protocols"
 	)
 	local module
 	for module in "${modules[@]}"; do
 		rmdir "${S}/third-party/${module#*:}" || die
 		mv "${WORKDIR}/${module%:*}" "${S}/third-party/${module#*:}" || die
 	done
-	rmdir "${S}/third-party/moonlight-common-c/enet" || die
-	mv "${WORKDIR}/enet-${ENET_COMMIT}" "${S}/third-party/moonlight-common-c/enet" || die
 
 	# Upstream does not publish a lockfile or source web-asset archive.
 	# Resolve npm dependencies here, before network-sandbox applies; build offline.
@@ -134,48 +121,12 @@ src_prepare() {
 }
 
 src_configure() {
-	local ffmpeg_prefix="${WORKDIR}/ffmpeg-install"
-	local ffmpeg_args=(
-		--prefix="${ffmpeg_prefix}"
-		--libdir="${ffmpeg_prefix}/lib"
-		--cc="$(tc-getCC)"
-		--cxx="$(tc-getCXX)"
-		--ar="$(tc-getAR)"
-		--nm="$(tc-getNM)"
-		--ranlib="$(tc-getRANLIB)"
-		--pkg-config="$(tc-getPKG_CONFIG)"
-		--extra-cflags="${CFLAGS}"
-		--extra-ldflags="${LDFLAGS}"
-		--disable-all
-		--disable-autodetect
-		--disable-doc
-		--disable-programs
-		--disable-debug
-		--disable-stripping
-		--disable-shared
-		--enable-static
-		--enable-pic
-		--enable-avcodec
-		--enable-avutil
-		--enable-swscale
-		--enable-gpl
-		--enable-libx264
-		--enable-encoder=libx264
-		--enable-bsf=h264_metadata,hevc_metadata,av1_metadata
-		$(use_enable vaapi)
-		$(usev vaapi --enable-encoder=h264_vaapi,hevc_vaapi,av1_vaapi)
-		--enable-ffnvcodec
-		--enable-nvenc
-		--enable-encoder=h264_nvenc,hevc_nvenc,av1_nvenc
-	)
-	if tc-is-cross-compiler; then
-		ffmpeg_args+=( --enable-cross-compile --arch="$(tc-arch-kernel)" --target-os=linux --cross-prefix="${CHOST}-" --host-cc="$(tc-getBUILD_CC)" )
-	fi
-	pushd "${WORKDIR}/ffmpeg-${FFMPEG_VERSION}" >/dev/null || die
-	./configure "${ffmpeg_args[@]}" || die
-	popd >/dev/null || die
+	local ffmpeg_prefix
+	ffmpeg_prefix=$($(tc-getPKG_CONFIG) --variable=sdkdir hermes-ffmpeg-7) || die
+	[[ -n ${ffmpeg_prefix} ]] || die "Hermes FFmpeg SDK not found"
 
 	local mycmakeargs=(
+		-Dlibvirtualhid_DIR="${ESYSROOT}/usr/$(get_libdir)/libvirtualhid-hermes/cmake/libvirtualhid"
 		-DBUILD_SHARED_LIBS=OFF
 		-DBUILD_DOCS=OFF
 		-DBUILD_TESTS=OFF
@@ -183,11 +134,8 @@ src_configure() {
 		-DBUILD_WERROR=OFF
 		-DBOOST_USE_STATIC=OFF
 		-DFETCHCONTENT_FULLY_DISCONNECTED=ON
-		-DFETCHCONTENT_SOURCE_DIR_HERMES_LIBVIRTUALHID="${WORKDIR}/libvirtualhid-${VIRTUALHID_COMMIT}"
-		-DLIBVIRTUALHID_ENABLE_XTEST=$(usex X)
-		-DLIBVIRTUALHID_WARNINGS_AS_ERRORS=OFF
 		-DHERMES_FFMPEG_PREFIX="${ffmpeg_prefix}"
-		-DHERMES_FFMPEG_SOURCE="${WORKDIR}/ffmpeg-${FFMPEG_VERSION}"
+		-DHERMES_FFMPEG_SOURCE="${ffmpeg_prefix}/include"
 		-DSUNSHINE_ASSETS_DIR="share/${PN}"
 		-DSUNSHINE_EXECUTABLE_PATH="${EPREFIX}/usr/bin/hermes"
 		-DSUNSHINE_ENABLE_CUDA=$(usex cuda)
@@ -209,8 +157,6 @@ src_configure() {
 }
 
 src_compile() {
-	emake -C "${WORKDIR}/ffmpeg-${FFMPEG_VERSION}"
-	emake -C "${WORKDIR}/ffmpeg-${FFMPEG_VERSION}" install
 	local -x npm_config_offline=true npm_config_cache="${T}/npm-cache"
 	cmake_src_compile
 }

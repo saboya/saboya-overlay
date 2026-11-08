@@ -10,6 +10,11 @@ Accept the release ebuild in `/etc/portage/package.accept_keywords`:
 
 ```text
 =net-misc/hermes-0.7.0 ~amd64
+dev-libs/libdisplaydevice ~amd64
+dev-libs/libvirtualhid-hermes ~amd64
+net-libs/moonlight-enet ~amd64
+gui-libs/wlr-protocols ~amd64
+media-libs/hermes-ffmpeg ~amd64
 ```
 
 Then install it:
@@ -59,10 +64,22 @@ udev's `uaccess` rules grant access to the active local user.
 - KMS capture (`USE=kms`) grants `CAP_SYS_ADMIN` to `/usr/bin/hermes` through
   Gentoo's `filecaps` support. Disable `kms` to avoid that capability if another
   capture backend works for your compositor.
-- FFmpeg is compiled privately from source, including its internal CBS API;
-  this does not replace the system FFmpeg installation. Software H.264 and
-  NVENC encoders are built, with VAAPI encoders controlled by `USE=vaapi`.
+- `media-libs/hermes-ffmpeg` provides a separately packaged static FFmpeg/CBS
+  SDK under `/usr/lib64/hermes-ffmpeg/7` (or the architecture's library dir).
+  It does not replace the system FFmpeg installation. Hermes no longer builds
+  FFmpeg itself. Software H.264 and NVENC encoders are built, with VAAPI encoders
+  controlled by matching `USE=vaapi` on Hermes and the SDK.
+- CBS headers are private, so Hermes pins the exact SDK version and records a
+  subslot rebuild dependency. Updating it requires a compatibility/build check;
+  FFmpeg security updates must also be applied to this separate SDK package.
 - `USE=cuda` adds CUDA/NvFBC capture and requires a compatible CUDA compiler.
+- NVENC headers come from Gentoo's `media-libs/nv-codec-headers`, rather than
+  an embedded copy. The wlr protocol XML comes from `gui-libs/wlr-protocols`.
+- `dev-libs/libvirtualhid-hermes`, `dev-libs/libdisplaydevice`, and
+  `net-libs/moonlight-enet` provide separate installed static SDKs. The Hermes
+  HID fork uses its own SDK directory, and Moonlight ENet uses distinct headers
+  and an archive name so it can coexist with standard ENet. These snapshots
+  are pinned because upstream does not promise interchangeable APIs.
 - The npm dependencies are downloaded during `src_unpack`; configure and
   compile run offline. Neither ebuild currently provides a separately versioned
   npm dependency archive or lockfile; npm's transitive dependency resolution
