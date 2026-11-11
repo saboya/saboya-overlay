@@ -1,0 +1,10 @@
+#!/bin/sh
+
+# Bypass upstream's uv/bootstrap script: Portage supplies Python dependencies.
+# Keep all generated files outside the read-only, package-managed source tree.
+export PYTHONDONTWRITEBYTECODE=1
+export PYTHONPATH="@ROOT@"
+
+exec "@PYTHON@" -B -m installer --game bananza \
+	--root "@ROOT@" \
+	--temp "${XDG_CACHE_HOME:-${HOME}/.cache}/dkb-pc-recomp" "$@"
