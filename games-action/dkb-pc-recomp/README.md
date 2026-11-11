@@ -15,6 +15,26 @@ dkb-pc-recomp-setup --exefs /path/to/exefs --romfs /path/to/romfs \
     --dest "$HOME/Games/dkb" --jobs 6
 ```
 
+## Live version
+
+The `9999` ebuild tracks upstream's `bananza` branch. Like other live ebuilds,
+it has no keywords; accept it explicitly before installing:
+
+```text
+# /etc/portage/package.accept_keywords/dkb-pc-recomp
+=games-action/dkb-pc-recomp-9999 **
+```
+
+```sh
+emerge --ask =games-action/dkb-pc-recomp-9999
+```
+
+It assembles upstream's Linux source package from the Git checkout and records
+the commit in the installed `VERSION`. Re-emerge it to fetch newer sources, then
+rerun `dkb-pc-recomp-setup --dest /path/to/dkb` to update your game build.
+
+## Game setup
+
 Supported game versions are base **1.0.0** and update **3.2.0**. With a `.nup`, the
 newest supported update is selected by default; `--nup-package base` selects the
 base game. Supply your own legally obtained dump.
