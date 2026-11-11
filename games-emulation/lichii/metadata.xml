@@ -8,6 +8,7 @@
 	<use>
 		<flag name="cli">Build the SDL command-line frontend (lichii-cli)</flag>
 		<flag name="cubeb">Enable the Cubeb audio backend in addition to SDL audio</flag>
+		<flag name="nxconvert">Enable NX archive conversion and editing using the system nxformat library; loading NX games does not require this</flag>
 		<flag name="reshade">Enable ReShade FX post-processing effects</flag>
 	</use>
 	<upstream>

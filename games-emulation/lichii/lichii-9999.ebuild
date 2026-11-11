@@ -26,7 +26,7 @@ SRC_URI="
 # Includes the licenses of the bundled libraries and timezone data.
 LICENSE="GPL-2+ GPL-3+ AGPL-3+ Apache-2.0 BSD BSD-2 MIT public-domain || ( BSD GPL-2 )"
 SLOT="0"
-IUSE="cli +cubeb +opengl +reshade"
+IUSE="cli +cubeb +nxconvert +opengl +reshade"
 
 # Upstream unconditionally disables BUILD_TESTING and ENABLE_TESTING.
 RESTRICT="test"
@@ -36,13 +36,12 @@ RDEPEND="
 	app-arch/lz4:=
 	dev-cpp/cpp-httplib:=[ssl,-mbedtls]
 	>=dev-libs/boost-1.84:=[context]
-	>=dev-libs/libfmt-8:=
+	>=dev-libs/libfmt-10:=
 	>=dev-libs/openssl-3:0=
 	>=dev-libs/quazip-1.3:=
 	>=dev-libs/sirit-1.0.5
 	dev-libs/libusb:1
 	dev-qt/qtbase:6[concurrent,dbus,gui,network,widgets]
-	dev-qt/qtcharts:6
 	>=media-libs/libsdl3-3.2.10
 	>=media-libs/opus-1.3
 	media-libs/vulkan-loader
@@ -51,6 +50,7 @@ RDEPEND="
 	sys-libs/minizip-ng[compat]
 	sys-libs/zlib-ng:=[compat]
 	cubeb? ( media-libs/cubeb )
+	nxconvert? ( >=dev-libs/nxformat-1.0.3 )
 "
 DEPEND="
 	${RDEPEND}
@@ -58,6 +58,7 @@ DEPEND="
 	dev-cpp/simpleini
 	>=dev-libs/frozen-1.2.0
 	>=dev-libs/xbyak-7
+	>=dev-libs/xxhash-0.8.3
 	dev-util/spirv-headers
 	>=dev-util/vulkan-headers-1.4.317
 	dev-util/vulkan-utility-libraries
@@ -78,6 +79,13 @@ src_unpack() {
 src_prepare() {
 	cmake_src_prepare
 
+	# Upstream otherwise downloads a prebuilt nxformat during configure.
+	cp "${FILESDIR}/NxFormat.cmake" CMakeModules/NxFormat.cmake || die
+	# xxHash is used header-only; CPM's DOWNLOAD_ONLY mode bypasses system
+	# package lookup, so explicitly use the installed header instead.
+	sed -i -e '/AddJsonPackage(NAME xxhash DOWNLOAD_ONLY)/c\find_path(xxhash_SOURCE_DIR NAMES xxhash.h REQUIRED)' \
+		externals/CMakeLists.txt || die
+
 	# CUSTOM_DIR bypasses CPMUtil's patch handling.
 	if use reshade; then
 		(
@@ -96,6 +104,8 @@ src_configure() {
 		-DDYNARMIC_TESTS=OFF
 		-DYUZU_TESTS=OFF
 		-DENABLE_WERROR=OFF
+		-DLICHII_FUZZERS=OFF
+		-DLICHII_ENABLE_NX_CONVERTER=$(usex nxconvert)
 		-DENABLE_LTO=OFF
 		-DUSE_CCACHE=OFF
 		-DUSE_FASTER_LINKER=OFF
